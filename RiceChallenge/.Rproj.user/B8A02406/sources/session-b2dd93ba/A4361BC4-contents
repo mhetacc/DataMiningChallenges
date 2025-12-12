@@ -1,0 +1,58 @@
+---
+title: "PCA"
+author: "Livio Finos"
+date: "2025-03-03"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Student marks
+
+```{r cars}
+load("studentMarks.Rdata")
+
+```
+
+## EDA
+
+```{r}
+mean(marks[,1])
+
+mean(marks[,"MECH"])
+
+colMeans(marks)
+
+
+summary(marks)
+
+var(marks)
+cor(marks)
+
+```
+
+```{r}
+plot(marks[,1],marks[,2])
+
+plot(marks)
+```
+
+## PCA
+
+```{r}
+# princomp()
+
+pc <- prcomp(marks)
+pc
+
+summary(pc)
+
+```
+
+```{r}
+
+biplot(pc)
+```
+

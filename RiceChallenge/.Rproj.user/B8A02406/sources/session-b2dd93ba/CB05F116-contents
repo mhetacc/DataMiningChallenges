@@ -1,0 +1,135 @@
+
+---
+title: "Nonparametric Regression on the Lidar Dataset"
+output: html_document
+author: ea
+---
+
+# Introduction
+
+In this lab, we explore various **nonparametric regression techniques** to predict `logratio` as a function of `range` using the `lidar` dataset. These methods include:
+
+- Local linear regression  
+- Step functions  
+- Loess regression  
+- Regression splines  
+- Smoothing splines  
+
+For each method, we analyze how different **tuning parameters** affect the model fit.
+
+# Load and Explore Data
+
+```{r}
+df <- read.table("lidar.txt", header = T)
+head(df)
+```
+
+# Local Linear Regression (via `sm`)
+
+This method uses a **bandwidth parameter `h`** to control the degree of smoothing. Smaller values of `h` capture local structure, while larger values yield smoother estimates.
+
+```{r}
+library(sm)
+par(mfrow = c(1, 3))
+sm.regression(df$range, df$logratio, h = 2.0,main = "h = 2.0")
+sm.regression(df$range, df$logratio, h = 10, main = "h = 0.5")
+sm.regression(df$range, df$logratio, h = 20, main = "h = 1.0")
+```
+
+# Local Linear Regression (via `KernSmooth::locpoly`)
+
+Similar to the previous method, the main tuning parameter is the **bandwidth**. The function `locpoly()` estimates the regression using local polynomials of degree 1.
+
+```{r}
+library(KernSmooth)
+fit1 <- locpoly(df$range, df$logratio, bandwidth = 10)
+fit2 <- locpoly(df$range, df$logratio, bandwidth = 20)
+fit3 <- locpoly(df$range, df$logratio, bandwidth = 3)
+par(mfrow = c(1,1))
+plot(df$range, df$logratio, col = "grey", pch = 20, 
+     main = "Local Linear Regression (locpoly)", xlab = "range", ylab = "Logratio")
+lines(fit1, col = "red", lwd = 2)
+lines(fit2, col = "blue", lwd = 2)
+lines(fit3, col = "green", lwd = 2)
+legend("topright", legend = c("bw = 10", "bw = 20", "bw = 3"),
+       col = c("red", "blue", "green"), lwd = 2)
+```
+
+# Step Functions
+
+Step functions partition the predictor space into bins. The number of **breaks** controls the complexity of the model: more breaks increase flexibility.
+
+```{r}
+breaks <- 10
+step_var <- cut(df$range, breaks = breaks)
+fit_step <- lm(logratio ~ step_var, data = df)
+pred_step <- fitted(fit_step)
+
+plot(df$range, df$logratio, col = "grey", pch = 20, 
+     main = "Step Function Regression", xlab = "range", ylab = "Logratio")
+lines(df$range, pred_step, col = "blue", lwd = 2)
+```
+
+# Loess Regression
+
+Loess regression performs **local polynomial fitting**. The main tuning parameter is `span`, which determines the proportion of data used for each local fit.
+
+```{r}
+fit_loess1 <- loess(logratio ~ range, data = df, span = 0.1)
+fit_loess2 <- loess(logratio ~ range, data = df, span = 0.5)
+fit_loess3 <- loess(logratio ~ range, data = df, span = 0.9)
+
+pred1 <- predict(fit_loess1)
+pred2 <- predict(fit_loess2)
+pred3 <- predict(fit_loess3)
+
+plot(df$range, df$logratio, col = "grey", pch = 20, 
+     main = "Loess Regression", xlab = "range", ylab = "Logratio")
+lines(df$range, pred1, col = "red", lwd = 2)
+lines(df$range, pred2, col = "blue", lwd = 2)
+lines(df$range, pred3, col = "green", lwd = 2)
+legend("topright", legend = c("span = 0.1", "span = 0.5", "span = 0.9"), 
+       col = c("red", "blue", "green"), lwd = 2)
+```
+
+# Regression Splines (via `bs`)
+
+Regression splines use a set of **basis functions**, with degrees of freedom (`df`) controlling the flexibility of the spline.
+
+```{r}
+library(splines)
+
+fit_bs3 <- lm(logratio ~ bs(range, df = 3), data = df)
+fit_bs6 <- lm(logratio ~ bs(range, df = 6), data = df)
+fit_bs10 <- lm(logratio ~ bs(range, df = 20), data = df)
+
+pred3 <- predict(fit_bs3)
+pred6 <- predict(fit_bs6)
+pred10 <- predict(fit_bs10)
+
+plot(df$range, df$logratio, col = "grey", pch = 20, main = "Regression Splines",
+     xlab = "range", ylab = "Logratio")
+lines(df$range, pred3, col = "red", lwd = 2)
+lines(df$range, pred6, col = "blue", lwd = 2)
+lines(df$range, pred10, col = "green", lwd = 2)
+legend("topright", legend = c("df = 3", "df = 6", "df = 20"), 
+       col = c("red", "blue", "green"), lwd = 2)
+```
+
+# Smoothing Splines
+
+Smoothing splines automatically choose knots but control smoothness via the `spar` parameter. Lower values of `spar` produce more flexible fits.
+
+```{r}
+fit_smooth1 <- smooth.spline(df$range, df$logratio, spar = 0.3)
+fit_smooth2 <- smooth.spline(df$range, df$logratio, spar = 0.6)
+fit_smooth3 <- smooth.spline(df$range, df$logratio, spar = 1.0)
+
+plot(df$range, df$logratio, col = "grey", pch = 20, main = "Smoothing Splines", 
+     xlab = "range", ylab = "Logratio")
+lines(fit_smooth1, col = "red", lwd = 2)
+lines(fit_smooth2, col = "blue", lwd = 2)
+lines(fit_smooth3, col = "green", lwd = 2)
+legend("topright", legend = c("spar = 0.3", "spar = 0.6", "spar = 1.0"), 
+       col = c("red", "blue", "green"), lwd = 2)
+```
