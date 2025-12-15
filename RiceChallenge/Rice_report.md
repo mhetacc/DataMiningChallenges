@@ -1,6 +1,6 @@
 # Preliminary Observations
 
-## Dasets
+## Datasets
 
 All following considerations are made using the datasets provided on the challenge page (*rice_test.csv* and *rice_train.csv*), but it is worth noting that a more complete version of them can be found at the [datasets source page](https://www.muratkoklu.com/datasets/). I used it to compute an alternative version of the *test* dataset that contains the true attribute for *Class*.
 
@@ -171,19 +171,60 @@ We see a significant improvement compared to linear regression, since $RMSE \app
 Lastly, we fit the model on the whole dataset and predict classes with *bestlam*.
 
 ```{r}
-  out <- glmnet(x, y, alpha = 0)
-  x_test <- model.matrix(~ ., data=rice_test)[, -1]  
-  yhat <- (predict(out, newx=x_test, s = bestlam)>1.5)+1
+out <- glmnet(x, y, alpha = 0)
+x_test <- model.matrix(~ ., data=rice_test)[, -1]  
+yhat <- (predict(out, newx=x_test, s = bestlam)>1.5)+1
 ```
 
 #### Ridge Plot
 
 ![](../RiceChallenge/ridgeplot.png)
 
-We can see an effective shrinkage of most coefficients torwards zero, with the exception of Eccentricity, which we already recognized as not very impactful on the overall variance and prediction.
-
+We can see an effective shrinkage of most coefficients towards zero, with the exception of Eccentricity, which we already recognized as not very impactful on the overall variance and prediction.
 
 ### Lasso
+
+Procedure its very similar to ridge, except gimlet gets called with *alpha = 1*.
+
+```{r}
+lasso_fit <- glmnet(x, y, alpha = 1)
+```
+
+Some metrics:
+- $MSE = 0.07348723$
+- $RMSE = 0.2786708$
+
+We can see a slight improvement over ridge regression.
+
+#### Lasso Plot
+
+![](../RiceChallenge/lassoplot.png)
+
+Once again Eccentricity seems to resist shrinkage, but overall we can see a greater degree of coefficient reduction compared to ridge regression (as it should). 
+
+### Principal Components Regression
+
+![](../RiceChallenge/validationplot_pcr.png)
+
+Now we find that the lowest cross-validation error occurs when $M=6$ components are used, but it is almost identical with $M=2$ components.
+
+We compute both test MSE (for two and six components respectively) as follows.
+
+```{r}
+pcr.pred <- predict(pcr.fit, x[test, ], ncomp = 2)
+mean((pcr.pred - y.test)^2)   # [1] 0.07795264
+
+pcr.pred <- predict(pcr.fit, x[test, ], ncomp = 6)
+mean((pcr.pred - y.test)^2)   # [1] 0.07416117
+```
+
+Which means that, with six principal components, PCR obtain:
+- $MSE = 0.07416117$
+- $RMSE = 0.2723255$
+
+Improving even more over lasso regression
+
+### Partial Least Squares
 
 ## Nonparametric Regression Techniques
 

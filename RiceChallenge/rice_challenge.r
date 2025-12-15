@@ -97,12 +97,55 @@ lassoregression <- function(){
   cv_rmse <- sqrt(cv_mse)
   cv_rmse
 
+  ## same as of cv.out
+  # lasso.pred <- predict(lasso.mod, s = bestlam, newx = x[test, ])
+  # mean((lasso.pred - y.test)^2)
+
 
   # fit ridge model with best lambda
   lasso_fit <- glmnet(x, y, alpha = 1)
-  #predict(lasso_fit, type = "coefficients", s = bestlam)[1:20, ]
+  
+  plot(lasso_fit, xvar = "lambda")
+  legend(
+    "bottomleft",
+    legend = colnames(x),
+    col = 1:ncol(x),
+    lty = 1,
+    cex = 0.8
+  )
 
   # lastly predict yhat on test set 
   x_test <- model.matrix(~ ., data=rice_test)[, -1]  
   yhat <- (predict(lasso_fit, newx=x_test, s = bestlam)>1.5)+1
+}
+
+
+pcr <- function(){
+  x <- model.matrix(Class ~ ., data=rice_train)[, -1]  
+  y <- rice_train$Class 
+
+  # split training set to estimate test error
+  set.seed(1)
+  train <- sample(1:nrow(x), nrow(x) / 2)
+  test <- (-train)
+  y.test <- y[test]
+
+  library(pls)
+  set.seed(2)
+
+  # fit principal component regression with cross validation
+  pcr.fit <- pcr(Class ~ ., data = rice_train, subset = train,
+    scale = TRUE, validation = "CV")
+  validationplot(pcr.fit, val.type = "MSEP")
+
+  # compute mse
+  pcr.pred <- predict(pcr.fit, x[test, ], ncomp = 2)
+  mean((pcr.pred - y.test)^2)
+
+  pcr.pred <- predict(pcr.fit, x[test, ], ncomp = 6)
+  mean((pcr.pred - y.test)^2)
+ 
+  # predict on whole dataset and predict yhat
+  pcr.fit <- pcr(Class ~ ., data = rice_train, scale = TRUE, ncomp = 6)
+  yhat <- (predict(pcr.fit, newdata=rice_test, ncomp = 6)>1.5)+1
 }
