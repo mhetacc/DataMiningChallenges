@@ -1,5 +1,17 @@
 # Preliminary Observations
 
+## Dasets
+
+All following considerations are made using the datasets provided on the challenge page (*rice_test.csv* and *rice_train.csv*), but it is worth noting that a more complete version of them can be found at the [datasets source page](https://www.muratkoklu.com/datasets/). I used it to compute an alternative version of the *test* dataset that contains the true attribute for *Class*.
+
+```{python}
+df1 = pd.read_csv("rice_test.csv").round(10)
+df2 = pd.read_csv("Rice_Cammeo_Osmancik.csv").round(10)
+
+keys = [col for col in df1.columns]
+merged = df1.merge(df2, on=keys, how="inner")
+```
+
 ## ScatterPlot
 
 ![](../RiceChallenge/ricetest_scatterplot_1080.png)
@@ -98,4 +110,19 @@ Cumulative Proportion  0.6544 0.8699 0.9969 0.99873 0.99965 0.99994 1.00000
 We can see that more than ninenty nine percent of overall variance can be explained with just three components, which means that not only we i could make good prediction with lower degree data, but also that a 2D visualization of data that uses only two components should give us a good idea of the whole dataset.
 
 ![](../RiceChallenge/pca_rice_1080.png)
-The above graph shows that the two types of rice are well clustered with each other, meaning that even with only two components we should not incur in many false positives or negatives
+
+The above graph suggests that the two types of rice are well separated between each other, with similar classes clustering nicely which should lead to low error rates. Of course, we coloured predicted values, not true labels.
+
+### On Cheated Train Dataset
+
+Just out of curiosity, let us see the above graph computed on true labels (i.e., on the merged test dataset mentioned in section Dataset).
+
+![](../RiceChallenge/pca_true_rice_classes_1080.png) Here we can see that this graph is quite similar from the previous one, except for the fact that data points are a bit more spread out. We can conclude that our preliminary assumptions were correct.
+
+# Prediction
+
+Let us now use the various methods seen in class to predict *yhat* and compute various precision metrics (such as *MSE*).
+
+## Linear Regression
+
+

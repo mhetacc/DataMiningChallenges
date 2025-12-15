@@ -1,10 +1,7 @@
 import pandas as pd
 
-df1 = pd.read_csv("rice_test.csv", sep=",")
-df2 = pd.read_csv("Rice_Cammeo_Osmancik.csv", sep=",")
-df2 = df2.round(10)         
-df1 = df1.round(10)         # otherwise doesnt find equal values
-
+df1 = pd.read_csv("rice_test.csv", sep=",").round(10)
+df2 = pd.read_csv("Rice_Cammeo_Osmancik.csv", sep=",").round(10)
 df1=pd.DataFrame(df1)
 df2=pd.DataFrame(df2)
 

@@ -20,3 +20,22 @@ pc_df$PredictedClass <- factor(yhat)
 ggplot(pc_df, aes(PC1, PC2, color = PredictedClass)) +
   geom_point() +
   labs(title = "PCA: coloured by classess predicted using lm()")
+
+
+# plot two principal components with colouring the predicted class with cheat df
+library(ggplot2)
+
+pc_df <- as.data.frame(pc$x[, 1:2])
+pc_df$Class <- factor(rice_test_with_class$Class)
+
+ggplot(pc_df, aes(PC1, PC2, color = Class)) +
+  geom_point() +
+  labs(title = "PCA: coloured by true classes")
+
+## Prediction ##
+
+
+
+
+
+
