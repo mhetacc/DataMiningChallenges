@@ -1,0 +1,101 @@
+# Preliminary Observations
+
+## ScatterPlot
+
+![](../RiceChallenge/ricetest_scatterplot_1080.png)
+
+From the *scatterplot* we can infer that there are four features (Area, Perimeter, Convex_Area and Major_Axis_Lenght) that seems to share similar characteristics to the point of being almost linear between each other. For example, given the Area, a linear regression would predict with great precision both Perimeter and Convex_Area.
+
+## Correlation Matrix
+
+We can use a correlation matrix to see exactly how related to each other the features are.
+
+```{r}
+cor(test)
+```
+
+```{bash}
+                         Area  Perimeter Major_Axis_Length Minor_Axis_Length Eccentricity Convex_Area      Extent
+Area               1.00000000  0.9648441         0.9015284         0.7810733    0.3675062   0.9989030 -0.06433114
+Perimeter          0.96484406  1.0000000         0.9725828         0.6156633    0.5630967   0.9684781 -0.14121985
+Major_Axis_Length  0.90152836  0.9725828         1.0000000         0.4390172    0.7236148   0.9019506 -0.15033884
+Minor_Axis_Length  0.78107334  0.6156633         0.4390172         1.0000000   -0.2855540   0.7804015  0.06755560
+Eccentricity       0.36750616  0.5630967         0.7236148        -0.2855540    1.0000000   0.3683452 -0.21374012
+Convex_Area        0.99890295  0.9684781         0.9019506         0.7804015    0.3683452   1.0000000 -0.07090790
+Extent            -0.06433114 -0.1412199        -0.1503388         0.0675556   -0.2137401  -0.0709079  1.00000000
+```
+
+As suspected, all four features mentioned above have a degree of correlation that exceeds ninety percent.
+
+## Features Contribution
+
+If we only had the above mentioned four features, then a linear regression would probably be enough to classify rice grains. Let's now try to see how much the remaining three features contribute on the explained variance.
+
+### Linear Regression Coefficients
+
+```{r}
+fit = lm(Class ~ ., data=train)
+
+summary(fit)
+```
+
+```{bash}
+Coefficients:
+                    Estimate Std. Error t value Pr(>|t|)    
+(Intercept)       -2.152e+00  1.990e+00  -1.081 0.279633    
+Area               5.601e-04  1.023e-04   5.474 4.79e-08 ***
+Perimeter          8.440e-03  2.221e-03   3.800 0.000148 ***
+Major_Axis_Length -2.198e-02  5.709e-03  -3.851 0.000120 ***
+Minor_Axis_Length  4.669e-02  1.213e-02   3.850 0.000121 ***
+Eccentricity       4.534e+00  1.828e+00   2.481 0.013170 *  
+Convex_Area       -8.609e-04  9.418e-05  -9.141  < 2e-16 ***
+Extent             7.146e-02  7.144e-02   1.000 0.317237 
+```
+
+The significance starts tells us that, with the exception fo Minor_Axis_Lenght, the features that are highly correlated to each other contributes strongly to the model, while the Eccentricity and Extent contribute very little. This align with our prediticions.
+
+We can also measure the total variance explained by all predictors combined using $R^2$.
+
+```{r}
+summary(fit)$r.squared    # [1] 0.6953849
+```
+
+### Standardized Linear Regression Coefficients
+
+All components are centered around zero, with variance equal to one.
+
+```{r}
+library(lm.beta)
+lm.beta(fit)
+```
+
+```{bash}
+Standardized Coefficients::
+      (Intercept)              Area         Perimeter Major_Axis_Length Minor_Axis_Length      Eccentricity 
+               NA        1.95970669        0.60605955       -0.77272038        0.54256082        0.18931314 
+      Convex_Area            Extent 
+      -3.09099064        0.01114328 
+```
+
+Once again, we can see that Extent and Eccentricity contribute very little to the overall model.
+
+## Principal Components
+
+A good way to aggregate and simplify data is by decomposing it into its principal components (centered and scaled).
+
+```{r}
+pc <- prcomp(test, center = TRUE, scale. = TRUE)
+```
+
+```{bash}
+Importance of components:
+                          PC1    PC2    PC3     PC4     PC5     PC6     PC7
+Standard deviation     2.1403 1.2281 0.9428 0.11449 0.08022 0.04463 0.02086
+Proportion of Variance 0.6544 0.2155 0.1270 0.00187 0.00092 0.00028 0.00006
+Cumulative Proportion  0.6544 0.8699 0.9969 0.99873 0.99965 0.99994 1.00000
+```
+
+We can see that more than ninenty nine percent of overall variance can be explained with just three components, which means that not only we i could make good prediction with lower degree data, but also that a 2D visualization of data that uses only two components should give us a good idea of the whole dataset.
+
+![](../RiceChallenge/pca_rice_1080.png)
+The above graph shows that the two types of rice are well clustered with each other, meaning that even with only two components we should not incur in many false positives or negatives
