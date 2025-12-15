@@ -149,3 +149,33 @@ pcr <- function(){
   pcr.fit <- pcr(Class ~ ., data = rice_train, scale = TRUE, ncomp = 6)
   yhat <- (predict(pcr.fit, newdata=rice_test, ncomp = 6)>1.5)+1
 }
+
+
+pls <- function(){
+  x <- model.matrix(Class ~ ., data=rice_train)[, -1]  
+  y <- rice_train$Class 
+
+  # split training set to estimate test error
+  set.seed(1)
+  train <- sample(1:nrow(x), nrow(x) / 2)
+  test <- (-train)
+  y.test <- y[test]
+
+  library(pls)
+  set.seed(2)
+
+  # fit principal component regression with cross validation
+  pls.fit <- plsr(Class ~ ., data = rice_train, subset = train, scale = TRUE, validation = "CV")
+  validationplot(pls.fit, val.type = "MSEP")
+  
+  # compute mse
+  pls.pred <- predict(pls.fit, x[test, ], ncomp = 2)
+  mean((pls.pred - y.test)^2)
+
+  pls.pred <- predict(pls.fit, x[test, ], ncomp = 6)
+  mean((pls.pred - y.test)^2)
+ 
+  # predict on whole dataset and predict yhat
+  pls.fit <- pcr(Class ~ ., data = rice_train, scale = TRUE, ncomp = 7)
+  yhat <- (predict(pls.fit, newdata=rice_test, ncomp = 6)>1.5)+1
+}

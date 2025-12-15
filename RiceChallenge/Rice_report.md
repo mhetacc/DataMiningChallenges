@@ -204,6 +204,13 @@ Once again Eccentricity seems to resist shrinkage, but overall we can see a grea
 
 ### Principal Components Regression
 
+We once again split the data to fit and validate the model with cross validation.
+
+```{r}
+pcr.fit <- pcr(Class ~ ., data = rice_train, subset = train, scale = TRUE, validation = "CV")
+validationplot(pcr.fit, val.type = "MSEP")
+```
+
 ![](../RiceChallenge/validationplot_pcr.png)
 
 Now we find that the lowest cross-validation error occurs when $M=6$ components are used, but it is almost identical with $M=2$ components.
@@ -218,13 +225,35 @@ pcr.pred <- predict(pcr.fit, x[test, ], ncomp = 6)
 mean((pcr.pred - y.test)^2)   # [1] 0.07416117
 ```
 
-Which means that, with six principal components, PCR obtain:
+Which means that, with six principal components, PCR obtains:
 - $MSE = 0.07416117$
 - $RMSE = 0.2723255$
 
-Improving even more over lasso regression
+Improving even more over lasso regression.
+
+Finally, we train the model on the whole data and use it to predict *yhat*.
+
+```{r}
+pcr.fit <- pcr(Class ~ ., data = rice_train, scale = TRUE, ncomp = 6)
+yhat <- (predict(pcr.fit, newdata=rice_test, ncomp = 6)>1.5)+1
+```
 
 ### Partial Least Squares
+
+![](../RiceChallenge/validationplot_pls.png)
+
+Now it would seem that the lowest cross-validation error with just $M=2$ components.
+
+```{r}
+pls.pred <- predict(pls.fit, x[test, ], ncomp = 2)
+mean((pls.pred - y.test)^2)   # [1] 0.07609556
+``` 
+
+Which means that, with just two principal components, PLS obtains:
+- $MSE = 0.07609556$
+- $RMSE = 0.2758542$
+
+Slightly worse than PCR, but needs far less components, leading to reduced overfitting and better numerical stability. 
 
 ## Nonparametric Regression Techniques
 
