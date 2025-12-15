@@ -168,13 +168,20 @@ cv_rmse <- sqrt(cv_mse)       # [1] 0.2815085
 
 We see a significant improvement compared to linear regression, since $RMSE \approx 0.28$.
 
-Lastly, we fut the model on the whole dataset and predict classes with *bestlam*.
+Lastly, we fit the model on the whole dataset and predict classes with *bestlam*.
 
 ```{r}
   out <- glmnet(x, y, alpha = 0)
   x_test <- model.matrix(~ ., data=rice_test)[, -1]  
   yhat <- (predict(out, newx=x_test, s = bestlam)>1.5)+1
 ```
+
+#### Ridge Plot
+
+![](../RiceChallenge/ridgeplot.png)
+
+We can see an effective shrinkage of most coefficients torwards zero, with the exception of Eccentricity, which we already recognized as not very impactful on the overall variance and prediction.
+
 
 ### Lasso
 

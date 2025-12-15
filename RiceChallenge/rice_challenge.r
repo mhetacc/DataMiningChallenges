@@ -60,13 +60,49 @@ ridgeregression <- function(){
   cv_rmse
 
 
-  # fit ridge model with best lambda
-  out <- glmnet(x, y, alpha = 0)
-  #predict(out, type = "coefficients", s = bestlam)[1:20, ]
+  # fit ridge model with best lambda and plot it
+  ridge_fit <- glmnet(x, y, alpha = 0)
+
+  plot(ridge_fit, xvar = "lambda")
+  legend(
+    "bottomleft",
+    legend = colnames(x),
+    col = 1:ncol(x),
+    lty = 1,
+    cex = 0.8
+  )
 
   # lastly predict yhat on test set 
   x_test <- model.matrix(~ ., data=rice_test)[, -1]  
-  yhat <- (predict(out, newx=x_test, s = bestlam)>1.5)+1
+  yhat <- (predict(ridge_fit, newx=x_test, s = bestlam)>1.5)+1
 }
 
+lassoregression <- function(){
+  ## Lasso
+  x <- model.matrix(Class ~ ., data=rice_train)[, -1]  
+  y <- rice_train$Class 
 
+  # split training set to estimate test error
+  set.seed(1)
+  train <- sample(1:nrow(x), nrow(x) / 2)
+  test <- (-train)
+  y.test <- y[test]
+
+  # built-in cross-validation function for lasso lambda selection
+  set.seed(1)
+  cv.out <- cv.glmnet(x[train, ], y[train], alpha = 1)
+  plot(cv.out)
+  bestlam <- cv.out$lambda.min
+  cv_mse <- min(cv.out$cvm)
+  cv_rmse <- sqrt(cv_mse)
+  cv_rmse
+
+
+  # fit ridge model with best lambda
+  lasso_fit <- glmnet(x, y, alpha = 1)
+  #predict(lasso_fit, type = "coefficients", s = bestlam)[1:20, ]
+
+  # lastly predict yhat on test set 
+  x_test <- model.matrix(~ ., data=rice_test)[, -1]  
+  yhat <- (predict(lasso_fit, newx=x_test, s = bestlam)>1.5)+1
+}
