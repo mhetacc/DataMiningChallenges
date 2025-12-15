@@ -93,10 +93,10 @@ Once again, we can see that Extent and Eccentricity contribute very little to th
 
 ## Principal Components
 
-A good way to aggregate and simplify data is by decomposing it into its principal components (centered and scaled).
+A good way to aggregate and simplify data is by decomposing it into its principal components (centered in zero and scaled to have unit variance).
 
 ```{r}
-pc <- prcomp(test, center = TRUE, scale. = TRUE)
+pc <- prcomp(test, scale. = TRUE)
 ```
 
 ```{bash}
@@ -121,8 +121,62 @@ Just out of curiosity, let us see the above graph computed on true labels (i.e.,
 
 # Prediction
 
-Let us now use the various methods seen in class to predict *yhat* and compute various precision metrics (such as *MSE*).
+Let us now use the various methods seen in class to predict *yhat* and compute corresponding precision metrics (such as *MSE*).
 
-## Linear Regression
+## Parametric Methods
 
+### Linear Regression
+
+Let's first compute *MSE* and *RMSE* on the training set.
+
+```{r}
+fit = lm(Class ~ ., data=train)
+yhat = (predict(fit, newdata=test)>1.5)+1
+
+mse = mean((train$Class -yhat)^2)   # 0.48
+rmse = sqrt(mse)                    # 0.69
+```
+
+We can see that, on average, predictions are off by 0.7 units, which is far from ideal. Of course, we should split the training set into training and validation sets to get a more precise evaluation.
+
+Of course the actual prediction is computed on the test set.
+
+### Ridge Regression
+
+First we divide the training set into matrix *x* and vector *y*, then we split the training set to estimate test error.
+
+```{r}
+x <- model.matrix(Class ~ ., data=rice_train)[, -1]  
+y <- rice_train$Class 
+
+set.seed(1) # for reproducibility
+train <- sample(1:nrow(x), nrow(x) / 2)
+test <- (-train)
+y.test <- y[test]
+```
+
+Then, we use the built-in cross-validation function for ridge regression to compute the best possible $\lambda$, and calculate both best *MSE* and *RMSE*.
+
+```{r}
+library(glmnet)
+cv.out <- cv.glmnet(x[train, ], y[train], alpha = 0)
+plot(cv.out)
+bestlam <- cv.out$lambda.min
+cv_mse <- min(cv.out$cvm)     # [1] 0.07924703
+cv_rmse <- sqrt(cv_mse)       # [1] 0.2815085
+```
+
+We see a significant improvement compared to linear regression, since $RMSE \approx 0.28$.
+
+Lastly, we fut the model on the whole dataset and predict classes with *bestlam*.
+
+```{r}
+  out <- glmnet(x, y, alpha = 0)
+  x_test <- model.matrix(~ ., data=rice_test)[, -1]  
+  yhat <- (predict(out, newx=x_test, s = bestlam)>1.5)+1
+```
+
+### Lasso
+
+## Nonparametric Regression Techniques
 
