@@ -37,7 +37,7 @@ Convex_Area        0.99890295  0.9684781         0.9019506         0.7804015    
 Extent            -0.06433114 -0.1412199        -0.1503388         0.0675556   -0.2137401  -0.0709079  1.00000000
 ```
 
-As suspected, all four features mentioned above have a degree of correlation that exceeds ninety percent.
+As suspected, all four features mentioned above have a degree of correlation that exceeds ninety percent. This would mean that, especially for linear models, we would like to combine or remove them, since they can negatively impact regression performances.
 
 ## Features Contribution
 
@@ -64,7 +64,7 @@ Convex_Area       -8.609e-04  9.418e-05  -9.141  < 2e-16 ***
 Extent             7.146e-02  7.144e-02   1.000 0.317237 
 ```
 
-The significance starts tells us that, with the exception fo Minor_Axis_Length, the features that are highly correlated to each other contributes strongly to the model, while the Eccentricity and Extent contribute very little. This align with our predictions.
+The significance stars tells us that, with the exception fo Minor_Axis_Length, the features that are highly correlated to each other contributes strongly to the model, while the Eccentricity and Extent contribute very little. This align with our predictions.
 
 We can also measure the total variance explained by all predictors combined using $R^2$.
 
@@ -140,6 +140,15 @@ rmse = sqrt(mse)                    # 0.69
 We can see that, on average, predictions are off by 0.7 units, which is far from ideal. Of course, we should split the training set into training and validation sets to get a more precise evaluation.
 
 Of course the actual prediction is computed on the test set.
+
+#### Multicollinearity
+
+Since we know that collinearity can reduce regression precision by increasing the standard error bj which leads to a decline in t-statistic, we can try to combine highly correlated features and see if this translates in a reduction of the *MSE*. Since we know that we have four features that are correlated with each other by more than ninety percent, a straightforward solution would be to simply compute an average for all of them.
+
+```{r}
+rice.train$Combined <- rowMeans(rice.train[, c("Area","Perimeter","Major_Axis_Length","Convex_Area")])
+rice.test$Combined <- rowMeans(rice.test[, c("Area","Perimeter","Major_Axis_Length","Convex_Area")])
+```
 
 ### Ridge Regression
 
@@ -414,3 +423,30 @@ yhat <- predict(knn_fit, newdata=rice_test)
 ### Random Forest
 
 We can use caret package for random forest too
+
+#### Performances
+
+##### Multicollinearity
+
+This time computing the regression took an inordinate amount of time (more than one hour and forty minutes of computation). Thus, I decided to try to reduce the total amount of features by computing an average for the four most correlated ones, much like I did with linear regression at the begging of this report.
+
+```{r}
+rice.train$Combined <- rowMeans(rice.train[, c("Area","Perimeter","Major_Axis_Length","Convex_Area")])
+rice.test$Combined <- rowMeans(rice.test[, c("Area","Perimeter","Major_Axis_Length","Convex_Area")])
+```
+
+##### Ranger Method and Multiprocessing
+
+Another solution would be to use a different random forest fitting method, specifically *ranger* which is just a faster C++ implementation provided by *caret*. Moreover, we could leverage R's multiprocessing capabilities thanks to *doParallel* library.
+
+```{r}
+library(doParallel)
+cl <- makePSOCKcluster(detectCores() - 1)       # use all available cores except one
+registerDoParallel(cl)
+
+# Your train call will now run in parallel
+model_fit <- train(..., allowParallel = TRUE)
+
+# Stop the cluster when done
+stopCluster(cl)
+```

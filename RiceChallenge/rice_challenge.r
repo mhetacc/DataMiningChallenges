@@ -2,11 +2,25 @@ rice_train <- read.csv("rice_train.csv")
 rice_test <- read.csv("rice_test.csv")
 
 linearfit <- function(){
+  x <- model.matrix(Class ~ ., data=rice_train)[, -1]  
+  y <- rice_train$Class 
+
+  # split training set to estimate test error
+  set.seed(1)
+  train <- sample(1:nrow(x), nrow(x) / 2)
+  test <- (-train)
+  y.test <- y[test]
   # fit with linear regression
-  fit = lm(Class ~ ., data=rice_train)
+  linear_fit = lm(Class ~ ., data=rice_train, subset = train)
+
+  pred <- predict(linear_fit, newdata = rice_train[test, ])
+  mean((pred - y.test)^2)
+  rmse = sqrt(mse)                    # 0.69
 
   # vector with prediction for each row in test dataframe
   yhat = (predict(fit, newdata=rice_test)>1.5)+1
+
+  #### Collinearity ####
 }
 
 pcomp1 <- function(){
@@ -317,3 +331,4 @@ random_forest <- function(){
   yhat <- (predict(rf_fit, newdata=rice_test)>1.5)+1
 
 }
+
