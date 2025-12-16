@@ -404,15 +404,6 @@ To summarize, with $k = 19$:
 - $MSE = 0.05688406$
 - $RMSE = 0.2385038$
 
-Which is slightly better than LOESS with $span = 0.1$. The model is considerably more [TODO]
+Which is an improvement over LOESS with $span = 0.1$ (therefore it is the best result yet). We pay this precision with a considerable increase in computational demand: LOESS fitting was done in a matter of milliseconds, while KNN required almost five minutes.
 
 ### Random Forest
-
-# temp
-
-## training: 
-df is x[train, ]
-
-
-## test
-df is x[test, ]
