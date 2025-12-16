@@ -127,19 +127,18 @@ Let us now use the various methods seen in class to predict *yhat* and compute c
 
 ### Linear Regression
 
-Let's first compute *MSE* and *RMSE* on the training set.
+First, we split the data to have a test subset of the training set, then we predict and compute the *MSE*.
 
 ```{r}
-fit = lm(Class ~ ., data=train)
-yhat = (predict(fit, newdata=test)>1.5)+1
+linear_fit = lm(Class ~ ., data=rice_train, subset = train)
 
-mse = mean((train$Class -yhat)^2)   # 0.48
-rmse = sqrt(mse)                    # 0.69
+pred <- predict(linear_fit, newdata = rice_train[test, ])
+mean((pred - y.test)^2)       # [1] 0.07354557
 ```
 
-We can see that, on average, predictions are off by 0.7 units, which is far from ideal. Of course, we should split the training set into training and validation sets to get a more precise evaluation.
-
-Of course the actual prediction is computed on the test set.
+We get our first *MSE* baseline to compare the other methods to, specifically:
+- $MSE = 0.07354557$
+- $RMSE = 0.2711929$
 
 #### Multicollinearity
 
@@ -147,8 +146,14 @@ Since we know that collinearity can reduce regression precision by increasing th
 
 ```{r}
 rice.train$Combined <- rowMeans(rice.train[, c("Area","Perimeter","Major_Axis_Length","Convex_Area")])
-rice.test$Combined <- rowMeans(rice.test[, c("Area","Perimeter","Major_Axis_Length","Convex_Area")])
+
+  linear_fit = lm(Class ~ Minor_Axis_Length+Eccentricity+Extent+Combined, data=rice_train, subset = train)
+
+  pred <- predict(linear_fit, newdata = rice_train[test, ])
+  mean((pred - y.test)^2)     # [1] 0.07439239
 ```
+
+What we get is actually a slightly less performant model. 
 
 ### Ridge Regression
 
@@ -175,7 +180,7 @@ cv_mse <- min(cv.out$cvm)     # [1] 0.07924703
 cv_rmse <- sqrt(cv_mse)       # [1] 0.2815085
 ```
 
-We see a significant improvement compared to linear regression, since $RMSE \approx 0.28$.
+We actually get a worse result compared to a simple linear regression, since $RMSE \approx 0.28$.
 
 Lastly, we fit the model on the whole dataset and predict classes with *bestlam*.
 
@@ -203,7 +208,7 @@ Some metrics:
 - $MSE = 0.07348723$
 - $RMSE = 0.2786708$
 
-We can see a slight improvement over ridge regression.
+We can see a slight improvement over ridge and linear regression.
 
 #### Lasso Plot
 

@@ -15,12 +15,18 @@ linearfit <- function(){
 
   pred <- predict(linear_fit, newdata = rice_train[test, ])
   mean((pred - y.test)^2)
-  rmse = sqrt(mse)                    # 0.69
 
   # vector with prediction for each row in test dataframe
   yhat = (predict(fit, newdata=rice_test)>1.5)+1
 
   #### Collinearity ####
+  rice_train$Combined <- rowMeans(rice_train[, c("Area","Perimeter","Major_Axis_Length","Convex_Area")])
+  #rice_test$Combined <- rowMeans(rice_test[, c("Area","Perimeter","Major_Axis_Length","Convex_Area")])
+
+  linear_fit = lm(Class ~ Minor_Axis_Length+Eccentricity+Extent+Combined, data=rice_train, subset = train)
+
+  pred <- predict(linear_fit, newdata = rice_train[test, ])
+  mean((pred - y.test)^2)
 }
 
 pcomp1 <- function(){
