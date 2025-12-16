@@ -131,7 +131,7 @@ pcr <- function(){
   y.test <- y[test]
 
   library(pls)
-  set.seed(2)
+  set.seed(1)
 
   # fit principal component regression with cross validation
   pcr.fit <- pcr(Class ~ ., data = rice_train, subset = train,
@@ -142,7 +142,7 @@ pcr <- function(){
   pcr.pred <- predict(pcr.fit, x[test, ], ncomp = 2)
   mean((pcr.pred - y.test)^2)
 
-  pcr.pred <- predict(pcr.fit, x[test, ], ncomp = 6)
+  pcr.pred <- predict(pcr.fit, x[test, ], ncomp = 7)
   mean((pcr.pred - y.test)^2)
  
   # predict on whole dataset and predict yhat
@@ -179,3 +179,67 @@ pls <- function(){
   pls.fit <- pcr(Class ~ ., data = rice_train, scale = TRUE, ncomp = 7)
   yhat <- (predict(pls.fit, newdata=rice_test, ncomp = 6)>1.5)+1
 }
+
+llr <- function(){
+
+  library(locfit)
+
+  fit <- locfit(Class ~., data = rice_train)
+  # fatal error: eig_dec not converged
+}
+
+loess <- function(){
+  set.seed(1)
+  x <- model.matrix(Class ~ Area + Perimeter + Convex_Area + Major_Axis_Length, data=rice_train)[, -1]  
+  y <- rice_train$Class 
+
+  # split training set to estimate test error
+
+  train <- sample(1:nrow(x), nrow(x) / 2)
+  test <- (-train)
+  y.test <- y[test]
+
+  # fit different fits to find best span
+  loess_fit1 <- loess(Class ~ Area + Perimeter + Convex_Area + Major_Axis_Length, data = rice_train, span = 0.1)
+
+  loess_fit2 <- loess(Class ~ Area + Perimeter + Convex_Area + Major_Axis_Length, data = rice_train, span = 0.5)
+
+  loess_fit3 <- loess(Class ~ Area + Perimeter + Convex_Area + Major_Axis_Length, data = rice_train, span = 0.9)
+
+  loess_fit4 <- loess(Class ~ Area + Perimeter + Convex_Area + Major_Axis_Length, data = rice_train, span = 2)
+
+  # different predictions
+  pred1 <- predict(loess_fit1, x[test, ])
+  mean((pred1 - y.test)^2)
+
+
+ 
+  pred2 <- predict(loess_fit2, x[test, ])
+  mean((pred2 - y.test)^2)
+ 
+  pred3 <- predict(loess_fit3, x[test, ])
+  mean((pred3 - y.test)^2)
+
+  pred4 <- predict(loess_fit3, x[test, ])
+  mean((pred3 - y.test)^2)
+
+  # with less predictors
+  loess_fit1.1 <- loess(Class ~ Area + Perimeter, data = rice_train, span = 0.1)
+  pred1.1 <- predict(loess_fit1.1, x[test, ])
+  mean((pred1.1 - y.test)^2)
+
+  loess_fit1.2 <- loess(Class ~ Area + Perimeter, data = rice_train, span = 0.5)
+  pred1.2 <- predict(loess_fit1.2, x[test, ])
+  mean((pred1.2 - y.test)^2)
+
+  loess_fit1.3 <- loess(Class ~ Area + Perimeter, data = rice_train, span = 0.9)
+  pred1.3 <- predict(loess_fit1.3, x[test, ])
+  mean((pred1.3 - y.test)^2)
+  
+  #bestspan = NaN
+  
+  # predict on whole dataset and predict yhat
+  #loess_fit <- loess(Class ~ ., data = rice_train, span = bestspan)
+  yhat <- (predict(loess_fit1.1, newdata=rice_test, span = 0.1)>1.5)+1
+}
+

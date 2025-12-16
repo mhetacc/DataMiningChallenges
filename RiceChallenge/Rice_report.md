@@ -16,7 +16,7 @@ merged = df1.merge(df2, on=keys, how="inner")
 
 ![](../RiceChallenge/ricetest_scatterplot_1080.png)
 
-From the *scatterplot* we can infer that there are four features (Area, Perimeter, Convex_Area and Major_Axis_Lenght) that seems to share similar characteristics to the point of being almost linear between each other. For example, given the Area, a linear regression would predict with great precision both Perimeter and Convex_Area.
+From the *scatterplot* we can infer that there are four features (Area, Perimeter, Convex_Area and Major_Axis_Length) that seems to share similar characteristics to the point of being almost linear between each other. For example, given the Area, a linear regression would predict with great precision both Perimeter and Convex_Area.
 
 ## Correlation Matrix
 
@@ -64,7 +64,7 @@ Convex_Area       -8.609e-04  9.418e-05  -9.141  < 2e-16 ***
 Extent             7.146e-02  7.144e-02   1.000 0.317237 
 ```
 
-The significance starts tells us that, with the exception fo Minor_Axis_Lenght, the features that are highly correlated to each other contributes strongly to the model, while the Eccentricity and Extent contribute very little. This align with our prediticions.
+The significance starts tells us that, with the exception fo Minor_Axis_Length, the features that are highly correlated to each other contributes strongly to the model, while the Eccentricity and Extent contribute very little. This align with our prediticions.
 
 We can also measure the total variance explained by all predictors combined using $R^2$.
 
@@ -213,7 +213,7 @@ validationplot(pcr.fit, val.type = "MSEP")
 
 ![](../RiceChallenge/validationplot_pcr.png)
 
-Now we find that the lowest cross-validation error occurs when $M=6$ components are used, but it is almost identical with $M=2$ components.
+Now we find that the lowest cross-validation error occurs when $M=7$ components are used, but it is almost identical with $M=2$ components.
 
 We compute both test MSE (for two and six components respectively) as follows.
 
@@ -221,15 +221,15 @@ We compute both test MSE (for two and six components respectively) as follows.
 pcr.pred <- predict(pcr.fit, x[test, ], ncomp = 2)
 mean((pcr.pred - y.test)^2)   # [1] 0.07795264
 
-pcr.pred <- predict(pcr.fit, x[test, ], ncomp = 6)
-mean((pcr.pred - y.test)^2)   # [1] 0.07416117
+pcr.pred <- predict(pcr.fit, x[test, ], ncomp = 7)
+mean((pcr.pred - y.test)^2)   # [1] 0.07354557
 ```
 
-Which means that, with six principal components, PCR obtains:
+Which means that, with seven principal components, PCR obtains:
 - $MSE = 0.07416117$
-- $RMSE = 0.2723255$
+- $RMSE = 0.2711929$
 
-Improving even more over lasso regression.
+Improving ever so slightly over lasso regression.
 
 Finally, we train the model on the whole data and use it to predict *yhat*.
 
@@ -257,3 +257,51 @@ Slightly worse than PCR, but needs far less components, leading to reduced overf
 
 ## Nonparametric Regression Techniques
 
+We tried to use only methods that support multivariate data
+
+### LOESS
+
+Loess allows up to four predictors, so we will put only the most useful ones that we previously identified: *Area, Perimeter, Convex_Area* and *Major_Axis_Length*. Predictors are normalized by default.
+
+We split the data like before, to have a subset to calculate *MSE*, and we try to fit three models with three different values of *span*. Then we calculate the *MSE* for each.
+
+```{r}
+loess_fit1 <- loess(Class ~ Area + Perimeter + Convex_Area + Major_Axis_Length, data = rice_train, span = 0.1)
+
+pred1 <- predict(loess_fit1, x[test, ])
+mean((pls.pred - y.test)^2)
+```
+
+The results follow:
+- $span = 0.1$ : $MSE = 6.656862$
+- $span = 0.5$ : $MSE = 0.9485616$
+- $span = 0.9$ : $MSE = 0.8861897$
+- $span = 10$ : $MSE = 0.6578858$
+
+Results are certainly unexpected. We then tried to reduce the number of predictors and immediately got better results.
+
+```{r}
+loess_fit1.1 <- loess(Class ~ Area + Perimeter, data = rice_train, span = 0.1)
+
+pred1.1 <- predict(loess_fit1.1, x[test, ])
+mean((pred1.1 - y.test)^2)    # [1] 0.05697516
+```
+
+With only two predictors the results follow:
+- $span = 0.1$ : $MSE = 0.05697516$
+- $span = 0.5$ : $MSE = 0.06433615$
+- $span = 0.9$ : $MSE = 0.06690586$
+
+We can see that, with all span values, we get the best *MSE* values yet, even with high levels of smoothing, which greatly reduce the risk of overfitting.
+
+All that's left predict *yhat*. Since we already use a low number of predictors, it is likely fine to use a small span.
+
+```{r}
+yhat <- (predict(loess_fit1.1, newdata=rice_test, span = 0.1)>1.5)+1
+```
+
+One last addendum: reducing the model to *Class ~ Area* only yielded worse results.
+
+### K-NN
+
+### Random Forest
