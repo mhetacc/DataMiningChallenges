@@ -277,7 +277,7 @@ The results follow:
 - $span = 0.5$ : $MSE = 1.799422$
 - $span = 0.9$ : $MSE = 0.2276324$
 
-Results are certainly not exceptional. We then tried to reduce the number of predictors and immediately got better results.
+Results are certainly not exceptional, showing great instability. We thus reduced the number of predictors and immediately got better results.
 
 ```{r}
 loess_fit1.1 <- loess(Class ~ Area + Perimeter, data = rice_train, subset = train, span = 0.1)
@@ -307,65 +307,15 @@ Considering the form of our dataset, one would argue that KNN should be the pref
 
 We used the [caret](https://topepo.github.io/caret/) package to handle KNN classification, using Leave-One-Out-Cross-Validation as validation method.
 
-#### Classification
-
-First wee must transform $Class$ attribute into a factor, then we can train the model. Then we can let caret take care of everything else.
-
-```{r}
-  rice_train$Class <- as.factor(rice_train$Class) # necessary, caret will automatically do classification 
-
-  knn_fit <- train(Class~ .,
-    method     = "knn",
-    tuneGrid   = expand.grid(k = 1:20),
-    trControl  = train.control,
-    preProcess = c("center","scale"),    # normalized
-    metric     = "Accuracy",
-    data       = rice_train)
-```
-
-```{bash}
-k-Nearest Neighbors 
-
-2810 samples
-   7 predictor
-   2 classes: '1', '2' 
-
-Pre-processing: centered (7), scaled (7) 
-Resampling: Leave-One-Out Cross-Validation 
-Summary of sample sizes: 2809, 2809, 2809, 2809, 2809, 2809, ... 
-Resampling results across tuning parameters:
-
-  k   Accuracy   Kappa    
-   1  0.8857651  0.7663350
-      ...................
-   9  0.9270463  0.8504819
-  10  0.9259786  0.8483103
-      ...................
-  13  0.9274021  0.8512274
-  15  0.9270463  0.8504493
-  16  0.9291815  0.8548896
-      ....................
-  20  0.9281139  0.8527823
-
-Accuracy was used to select the optimal model using the largest value.
-The final value used for the model was k = 16.
-```
-
-![](../RiceChallenge/knn_accuracy.png)
-
-The model is most accurate with the following values for $k$:
-- $k = 9$ : $Accuracy \approx  0.9271$
-- $k = 13$ : $Accuracy \approx  0.9274$
-- $k = 16$ : $Accuracy \approx  0.9292$
-
-#### For Regression
+#### Regression
 
 Since up to this point we always used $MSE$ as performance metric, if we want to be consistent we need to train the model in the same way. We can let caret take care of everything and see the results.
 
 ```{r}
   train$Class <- as.factor(train$Class) # necessary, caret will automatically do classification 
 
-  knn_fit <- train(Class~ .,
+  knn_fit <- train(
+    Class~ .,
     method     = "knn",
     tuneGrid   = expand.grid(k = 1:20),
     trControl  = train.control,
@@ -406,4 +356,61 @@ To summarize, with $k = 19$:
 
 Which is an improvement over LOESS with $span = 0.1$ (therefore it is the best result yet). We pay this precision with a considerable increase in computational demand: LOESS fitting was done in a matter of milliseconds, while KNN required almost five minutes.
 
+Lastly, we just need to predict *yhat* as usual. The optimal *k* is selected automatically.
+
+```{r}
+yhat <- (predict(knn_fit, newdata=rice_test)>1.5)+1
+```
+
+#### Classification
+
+First wee must transform $Class$ attribute into a factor, then we can train the model. Then we can let caret take care of everything else.
+
+```{r}
+  rice_train$Class <- as.factor(rice_train$Class) # necessary, caret will automatically do classification 
+
+  knn_fit <- train(
+    Class~ .,
+    method     = "knn",
+    tuneGrid   = expand.grid(k = 1:20),
+    trControl  = train.control,
+    preProcess = c("center","scale"),    # normalized
+    metric     = "Accuracy",
+    data       = rice_train)
+```
+
+```{bash}
+k-Nearest Neighbors 
+
+2810 samples
+   7 predictor
+   2 classes: '1', '2' 
+
+Pre-processing: centered (7), scaled (7) 
+Resampling: Leave-One-Out Cross-Validation 
+Summary of sample sizes: 2809, 2809, 2809, 2809, 2809, 2809, ... 
+Resampling results across tuning parameters:
+
+  k   Accuracy   Kappa    
+   1  0.8857651  0.7663350
+   2  0.8943060  0.7835226
+      .........  .........
+  19  0.9277580  0.8521018
+  20  0.9281139  0.8529105
+
+Accuracy was used to select the optimal model using the largest value.
+The final value used for the model was k = 20.
+```
+
+![](../RiceChallenge/knn_classification.png)
+
+The model is most accurate with $k = 20$, similarly to $k = 19$ that we got from KNN-Regression. Now we can predict *yhat* directly without manipulation since this model has been trained as classification from the start.
+
+```{r}
+yhat <- predict(knn_fit, newdata=rice_test)
+```
+
+
 ### Random Forest
+
+We can use caret package for random forest too
