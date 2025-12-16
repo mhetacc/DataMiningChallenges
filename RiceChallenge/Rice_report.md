@@ -263,38 +263,37 @@ We tried to use only methods that support multivariate data
 
 Loess allows up to four predictors, so we will put only the most useful ones that we previously identified: *Area, Perimeter, Convex_Area* and *Major_Axis_Length*. Predictors are normalized by default.
 
-We split the data like before, to have a subset to calculate *MSE*, and we try to fit three models with three different values of *span*. Then we calculate the *MSE* for each.
+We split the data like before, to have a subset to calculate *MSE*, and we try to fit three models with three different values of *span*. Then we calculate the *MSE* for each. We must sanitize the prediction since there can be some test points that falls outside the local neighborhood (i.e., *NA*, with $span = 0.1$ we have five such predictions)
 
 ```{r}
-loess_fit1 <- loess(Class ~ Area + Perimeter + Convex_Area + Major_Axis_Length, data = rice_train, span = 0.1)
+loess_fit1 <- loess(Class ~ Area + Perimeter + Convex_Area + Major_Axis_Length, data = rice_train, subset = train, span = 0.1)
 
-pred1 <- predict(loess_fit1, x[test, ])
-mean((pls.pred - y.test)^2)
+pred1 <- predict(loess_fit1, newdata = rice_train[test, ])
+mean((pred1 - y.test)^2, na.rm = TRUE)    # [1] 46.0226
 ```
 
 The results follow:
-- $span = 0.1$ : $MSE = 6.656862$
-- $span = 0.5$ : $MSE = 0.9485616$
-- $span = 0.9$ : $MSE = 0.8861897$
-- $span = 10$ : $MSE = 0.6578858$
+- $span = 0.1$ : $MSE = 46.0226$
+- $span = 0.5$ : $MSE = 1.799422$
+- $span = 0.9$ : $MSE = 0.2276324$
 
-Results are certainly unexpected. We then tried to reduce the number of predictors and immediately got better results.
+Results are certainly not exceptional. We then tried to reduce the number of predictors and immediately got better results.
 
 ```{r}
-loess_fit1.1 <- loess(Class ~ Area + Perimeter, data = rice_train, span = 0.1)
+loess_fit1.1 <- loess(Class ~ Area + Perimeter, data = rice_train, subset = train, span = 0.1)
 
-pred1.1 <- predict(loess_fit1.1, x[test, ])
-mean((pred1.1 - y.test)^2)    # [1] 0.05697516
+pred1.1 <- predict(loess_fit1.1, newdata = rice_train[test, ])
+mean((pred1.1 - y.test)^2, na.rm = TRUE)
 ```
 
 With only two predictors the results follow:
-- $span = 0.1$ : $MSE = 0.05697516$
-- $span = 0.5$ : $MSE = 0.06433615$
-- $span = 0.9$ : $MSE = 0.06690586$
+- $span = 0.1$ : $MSE = 0.06099749$
+- $span = 0.5$ : $MSE = 0.06514592$
+- $span = 0.9$ : $MSE = 0.06836381$
 
 We can see that, with all span values, we get the best *MSE* values yet, even with high levels of smoothing, which greatly reduce the risk of overfitting.
 
-All that's left predict *yhat*. Since we already use a low number of predictors, it is likely fine to use a small span.
+All that's left predict *yhat*. Since we already use a low number of predictors, it is likely fine to use a small *span* value.
 
 ```{r}
 yhat <- (predict(loess_fit1.1, newdata=rice_test, span = 0.1)>1.5)+1
@@ -304,18 +303,24 @@ One last addendum: reducing the model to *Class ~ Area* yielded worse results.
 
 ### KNN
 
-#### For Classification
+Considering the form of our dataset, one would argue that KNN should be the preferred method for classification.
 
-We used the [caret](https://topepo.github.io/caret/) package to handle KNN classification, using Leave-One-Out-Cross-Validation as validation method. We had to transform $Class$ attribute into a factor.
+We used the [caret](https://topepo.github.io/caret/) package to handle KNN classification, using Leave-One-Out-Cross-Validation as validation method.
+
+#### Classification
+
+First wee must transform $Class$ attribute into a factor, then we can train the model. Then we can let caret take care of everything else.
 
 ```{r}
-knn_fit <- train(Class~ .,
-      method     = "knn",
-      tuneGrid   = expand.grid(k = 1:20),
-      trControl  = train.control,
-      preProcess = c("center","scale"),    # normalized
-      metric     = "Accuracy",
-      data       = rice_train)
+  rice_train$Class <- as.factor(rice_train$Class) # necessary, caret will automatically do classification 
+
+  knn_fit <- train(Class~ .,
+    method     = "knn",
+    tuneGrid   = expand.grid(k = 1:20),
+    trControl  = train.control,
+    preProcess = c("center","scale"),    # normalized
+    metric     = "Accuracy",
+    data       = rice_train)
 ```
 
 ```{bash}
@@ -355,7 +360,59 @@ The model is most accurate with the following values for $k$:
 
 #### For Regression
 
-Since up to this point we always used $MSE$ as performance metric, if we want to be consistent we need to train the model in the same way.
+Since up to this point we always used $MSE$ as performance metric, if we want to be consistent we need to train the model in the same way. We can let caret take care of everything and see the results.
+
+```{r}
+  train$Class <- as.factor(train$Class) # necessary, caret will automatically do classification 
+
+  knn_fit <- train(Class~ .,
+    method     = "knn",
+    tuneGrid   = expand.grid(k = 1:20),
+    trControl  = train.control,
+    preProcess = c("center","scale"),    # normalized
+    metric     = "Accuracy",
+    data       = train)
+```
+
+```{bash}
+k-Nearest Neighbors 
+
+2810 samples
+   7 predictor
+
+Pre-processing: centered (7), scaled (7) 
+Resampling: Leave-One-Out Cross-Validation 
+Summary of sample sizes: 2809, 2809, 2809, 2809, 2809, 2809, ... 
+Resampling results across tuning parameters:
+
+  k   RMSE       Rsquared   MAE      
+   1  0.3379865  0.5872696  0.1142349
+   2  0.2879551  0.6756952  0.1092527
+      .........  .........  .........
+  19  0.2385038  0.7672863  0.1123207
+  20  0.2386848  0.7669258  0.1126385
+
+RMSE was used to select the optimal model using the smallest value.
+The final value used for the model was k = 19.
+```
+
+![](../RiceChallenge/knn_regression.png)
+
+We can see that the error drops considerably between one and five neighbors, and keeps decreasing until $k = 19$. The $R^2$ is also quite good, since the model explain more than seventy percent of the variance in target variable.
+
+To summarize, with $k = 19$:
+- $MSE = 0.05688406$
+- $RMSE = 0.2385038$
+
+Which is slightly better than LOESS with $span = 0.1$. The model is considerably more [TODO]
 
 ### Random Forest
 
+# temp
+
+## training: 
+df is x[train, ]
+
+
+## test
+df is x[test, ]

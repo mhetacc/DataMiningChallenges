@@ -190,7 +190,7 @@ llr <- function(){
 
 loess <- function(){
   set.seed(1)
-  x <- model.matrix(Class ~ Area + Perimeter + Convex_Area + Major_Axis_Length, data=rice_train)[, -1]  
+  x <- model.matrix(Class ~ ., data=rice_train)[, -1]  
   y <- rice_train$Class 
 
   # split training set to estimate test error
@@ -200,41 +200,34 @@ loess <- function(){
   y.test <- y[test]
 
   # fit different fits to find best span
-  loess_fit1 <- loess(Class ~ Area + Perimeter + Convex_Area + Major_Axis_Length, data = rice_train, span = 0.1)
+  loess_fit1 <- loess(Class ~ Area + Perimeter + Convex_Area + Major_Axis_Length, data = rice_train, subset = train, span = 0.1)
 
-  loess_fit2 <- loess(Class ~ Area + Perimeter + Convex_Area + Major_Axis_Length, data = rice_train, span = 0.5)
+  loess_fit2 <- loess(Class ~ Area + Perimeter + Convex_Area + Major_Axis_Length, data = rice_train, subset = train, span = 0.5)
 
-  loess_fit3 <- loess(Class ~ Area + Perimeter + Convex_Area + Major_Axis_Length, data = rice_train, span = 0.9)
-
-  loess_fit4 <- loess(Class ~ Area + Perimeter + Convex_Area + Major_Axis_Length, data = rice_train, span = 2)
+  loess_fit3 <- loess(Class ~ Area + Perimeter + Convex_Area + Major_Axis_Length, data = rice_train, subset = train, span = 0.9)
 
   # different predictions
-  pred1 <- predict(loess_fit1, x[test, ])
-  mean((pred1 - y.test)^2)
+  pred1 <- predict(loess_fit1, newdata = rice_train[test, ])
+  mean((pred1 - y.test)^2, na.rm = TRUE)
 
+  pred2 <- predict(loess_fit2, newdata = rice_train[test, ])
+  mean((pred2 - y.test)^2, na.rm = TRUE)
 
- 
-  pred2 <- predict(loess_fit2, x[test, ])
-  mean((pred2 - y.test)^2)
- 
-  pred3 <- predict(loess_fit3, x[test, ])
-  mean((pred3 - y.test)^2)
+  pred3 <- predict(loess_fit3, newdata = rice_train[test, ])
+  mean((pred3 - y.test)^2, na.rm = TRUE)
 
-  pred4 <- predict(loess_fit3, x[test, ])
-  mean((pred3 - y.test)^2)
+  ####### with less predictors ######
+  loess_fit1.1 <- loess(Class ~ Area + Perimeter, data = rice_train, subset = train, span = 0.1)
+  pred1.1 <- predict(loess_fit1.1, newdata = rice_train[test, ])
+  mean((pred1.1 - y.test)^2, na.rm = TRUE)
 
-  # with less predictors
-  loess_fit1.1 <- loess(Class ~ Area + Perimeter, data = rice_train, span = 0.1)
-  pred1.1 <- predict(loess_fit1.1, x[test, ])
-  mean((pred1.1 - y.test)^2)
+  loess_fit1.2 <- loess(Class ~ Area + Perimeter, data = rice_train, subset = train, span = 0.5)
+  pred1.2 <- predict(loess_fit1.2, newdata = rice_train[test, ])
+  mean((pred1.2 - y.test)^2, na.rm = TRUE)
 
-  loess_fit1.2 <- loess(Class ~ Area + Perimeter, data = rice_train, span = 0.5)
-  pred1.2 <- predict(loess_fit1.2, x[test, ])
-  mean((pred1.2 - y.test)^2)
-
-  loess_fit1.3 <- loess(Class ~ Area + Perimeter, data = rice_train, span = 0.9)
-  pred1.3 <- predict(loess_fit1.3, x[test, ])
-  mean((pred1.3 - y.test)^2)
+  loess_fit1.3 <- loess(Class ~ Area + Perimeter, data = rice_train, subset = train, span = 0.9)
+  pred1.3 <- predict(loess_fit1.3, newdata = rice_train[test, ])
+  mean((pred1.3 - y.test)^2, na.rm = TRUE)
   
   #bestspan = NaN
   
@@ -245,21 +238,13 @@ loess <- function(){
 
 knn <- function(){
   set.seed(1)
-  # split training set to estimate test error
-  x <- model.matrix(Class ~ ., data=rice_train)[, -1]  
-  y <- rice_train$Class 
-
-  train <- sample(1:nrow(x), nrow(x) / 2)
-  test <- (-train)
-  y.test <- y[test]
   
   # load library and set validation method
   library(caret)
-  set.seed(1)
   train.control <- trainControl(method  = "LOOCV")
 
   ### FOR CLASSIFICATION ###
-  train$Class <- as.factor(train$Class) # necessary, caret will automatically do classification 
+  rice_train <- as.factor(rice_train) # necessary, caret will automatically do classification 
 
   knn_fit <- train(Class~ .,
     method     = "knn",
@@ -267,9 +252,9 @@ knn <- function(){
     trControl  = train.control,
     preProcess = c("center","scale"),    # normalized
     metric     = "Accuracy",
-    data       = train)
+    data       = rice_train)
   
-  knn_predict <- predict(knn_fit, newdata = test)
+  knn_predict <- predict(knn_fit, newdata = x[test, ])
   #mean((knn_predict - y.test)^2)
   confusionMatrix(knn_predict, y.test)
 
@@ -283,12 +268,9 @@ knn <- function(){
     trControl  = train.control,
     preProcess = c("center","scale"),    # normalized
     metric     = "RMSE",
-    data       = train)
-  
-  knn_predict <- predict(knn_fit, newdata = test)
-  mean((knn_predict - y.test)^2)
-  #confusionMatrix(knn_predict, y.test)
+    data       = rice_train)
 
+  knn_fit
 
   # predict actual yhat
   yhat <- (predict(knn_fit, newdata=rice_test)>1.5)+1
