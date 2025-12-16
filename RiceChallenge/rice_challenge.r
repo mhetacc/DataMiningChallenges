@@ -243,3 +243,54 @@ loess <- function(){
   yhat <- (predict(loess_fit1.1, newdata=rice_test, span = 0.1)>1.5)+1
 }
 
+knn <- function(){
+  set.seed(1)
+  # split training set to estimate test error
+  x <- model.matrix(Class ~ ., data=rice_train)[, -1]  
+  y <- rice_train$Class 
+
+  train <- sample(1:nrow(x), nrow(x) / 2)
+  test <- (-train)
+  y.test <- y[test]
+  
+  # load library and set validation method
+  library(caret)
+  set.seed(1)
+  train.control <- trainControl(method  = "LOOCV")
+
+  ### FOR CLASSIFICATION ###
+  train$Class <- as.factor(train$Class) # necessary, caret will automatically do classification 
+
+  knn_fit <- train(Class~ .,
+    method     = "knn",
+    tuneGrid   = expand.grid(k = 1:20),
+    trControl  = train.control,
+    preProcess = c("center","scale"),    # normalized
+    metric     = "Accuracy",
+    data       = train)
+  
+  knn_predict <- predict(knn_fit, newdata = test)
+  #mean((knn_predict - y.test)^2)
+  confusionMatrix(knn_predict, y.test)
+
+  # predict actual yhat
+  yhat <- predict(knn_fit, newdata=rice_test)
+
+  ### FOR REGRESSION ###
+  knn_fit <- train(Class~ .,
+    method     = "knn",
+    tuneGrid   = expand.grid(k = 1:20),
+    trControl  = train.control,
+    preProcess = c("center","scale"),    # normalized
+    metric     = "RMSE",
+    data       = train)
+  
+  knn_predict <- predict(knn_fit, newdata = test)
+  mean((knn_predict - y.test)^2)
+  #confusionMatrix(knn_predict, y.test)
+
+
+  # predict actual yhat
+  yhat <- (predict(knn_fit, newdata=rice_test)>1.5)+1
+
+}

@@ -64,7 +64,7 @@ Convex_Area       -8.609e-04  9.418e-05  -9.141  < 2e-16 ***
 Extent             7.146e-02  7.144e-02   1.000 0.317237 
 ```
 
-The significance starts tells us that, with the exception fo Minor_Axis_Length, the features that are highly correlated to each other contributes strongly to the model, while the Eccentricity and Extent contribute very little. This align with our prediticions.
+The significance starts tells us that, with the exception fo Minor_Axis_Length, the features that are highly correlated to each other contributes strongly to the model, while the Eccentricity and Extent contribute very little. This align with our predictions.
 
 We can also measure the total variance explained by all predictors combined using $R^2$.
 
@@ -300,8 +300,62 @@ All that's left predict *yhat*. Since we already use a low number of predictors,
 yhat <- (predict(loess_fit1.1, newdata=rice_test, span = 0.1)>1.5)+1
 ```
 
-One last addendum: reducing the model to *Class ~ Area* only yielded worse results.
+One last addendum: reducing the model to *Class ~ Area* yielded worse results.
 
-### K-NN
+### KNN
+
+#### For Classification
+
+We used the [caret](https://topepo.github.io/caret/) package to handle KNN classification, using Leave-One-Out-Cross-Validation as validation method. We had to transform $Class$ attribute into a factor.
+
+```{r}
+knn_fit <- train(Class~ .,
+      method     = "knn",
+      tuneGrid   = expand.grid(k = 1:20),
+      trControl  = train.control,
+      preProcess = c("center","scale"),    # normalized
+      metric     = "Accuracy",
+      data       = rice_train)
+```
+
+```{bash}
+k-Nearest Neighbors 
+
+2810 samples
+   7 predictor
+   2 classes: '1', '2' 
+
+Pre-processing: centered (7), scaled (7) 
+Resampling: Leave-One-Out Cross-Validation 
+Summary of sample sizes: 2809, 2809, 2809, 2809, 2809, 2809, ... 
+Resampling results across tuning parameters:
+
+  k   Accuracy   Kappa    
+   1  0.8857651  0.7663350
+      ...................
+   9  0.9270463  0.8504819
+  10  0.9259786  0.8483103
+      ...................
+  13  0.9274021  0.8512274
+  15  0.9270463  0.8504493
+  16  0.9291815  0.8548896
+      ....................
+  20  0.9281139  0.8527823
+
+Accuracy was used to select the optimal model using the largest value.
+The final value used for the model was k = 16.
+```
+
+![](../RiceChallenge/knn_accuracy.png)
+
+The model is most accurate with the following values for $k$:
+- $k = 9$ : $Accuracy \approx  0.9271$
+- $k = 13$ : $Accuracy \approx  0.9274$
+- $k = 16$ : $Accuracy \approx  0.9292$
+
+#### For Regression
+
+Since up to this point we always used $MSE$ as performance metric, if we want to be consistent we need to train the model in the same way.
 
 ### Random Forest
+
