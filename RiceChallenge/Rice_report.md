@@ -147,13 +147,58 @@ Since we know that collinearity can reduce regression precision by increasing th
 ```{r}
 rice.train$Combined <- rowMeans(rice.train[, c("Area","Perimeter","Major_Axis_Length","Convex_Area")])
 
-  linear_fit = lm(Class ~ Minor_Axis_Length+Eccentricity+Extent+Combined, data=rice_train, subset = train)
+linear_fit = lm(Class ~ Minor_Axis_Length+Eccentricity+Extent+Combined, data=rice_train, subset = train)
 
-  pred <- predict(linear_fit, newdata = rice_train[test, ])
-  mean((pred - y.test)^2)     # [1] 0.07439239
+pred <- predict(linear_fit, newdata = rice_train[test, ])
+mean((pred - y.test)^2)     # [1] 0.07439239
 ```
 
-What we get is actually a slightly less performant model. 
+What we get is a slightly less performant model, since $MSE \approx 0.074$
+
+Another approach is to drop variables altogether, but first we measure their variance inflation factor.
+
+```{bash}
+> vif(linear_fit)
+             Area         Perimeter Major_Axis_Length Minor_Axis_Length      Eccentricity       Convex_Area            Extent 
+      1207.246932        231.583311        362.191786        183.891990         54.613735       1103.660065          1.110601 
+```
+
+As a rule of thumb *VIF* values over ten are considered bad, so now we will iteratively drop values and try to refit the model to see if we can improve the situation.
+
+- **Drop Area:**
+  - VIFs = 
+    - $Perimeter \approx 114$
+    - $Major\_Axis\_Length \approx 206$ 
+    - $Minor\_Axis\_Length \approx 133$ 
+    - $Eccentricity \approx 53$ 
+    - $Convex\_Area \approx 332$ 
+    - $Extent \approx 1$
+  - $MSE = 0.0735629$
+- **Drop Convex_Area:**
+  - VIFs = 
+    - $Perimeter \approx 108$
+    - $Major\_Axis\_Length \approx 134$ 
+    - $Minor\_Axis\_Length \approx 40$ 
+    - $Eccentricity \approx 49$ 
+    - $Extent \approx 1$
+  - $MSE = 0.07572877$
+- **Drop Major_Axis_Length:**
+  - VIFs = 
+    - $Perimeter \approx 47$
+    - $Minor\_Axis\_Length \approx 37$ 
+    - $Eccentricity \approx 29$ 
+    - $Extent \approx 1$
+  - $MSE = 0.07718435$
+- **Drop Perimeter:**
+  - VIFs = 
+    - $Minor\_Axis\_Length \approx 1$ 
+    - $Eccentricity \approx 1$ 
+    - $Extent \approx 1$
+  - $MSE = 0.0806868$
+
+As we can see, dropping *Area* resulted in performances similar to combining the variables with a simple median, while dropping the other features worsened prediction performances even further.
+
+Lastly, we can use methods that are explicitly robust against multicollinearity, for example ridge or lasso regressions, PCR and PSA and random forest.
 
 ### Ridge Regression
 
@@ -169,7 +214,7 @@ test <- (-train)
 y.test <- y[test]
 ```
 
-Then, we use the built-in cross-validation function for ridge regression to compute the best possible $\lambda$, and calculate both best *MSE* and *RMSE*.
+We use the *glmnet* library, which takes care of the variable standardization for us, and allow us to use the built-in cross-validation function for ridge regression to compute the best possible $\lambda$. We then calculate *MSE* and *RMSE*.
 
 ```{r}
 library(glmnet)
@@ -427,22 +472,7 @@ yhat <- predict(knn_fit, newdata=rice_test)
 
 ### Random Forest
 
-We can use caret package for random forest too
-
-#### Performances
-
-##### Multicollinearity
-
-This time computing the regression took an inordinate amount of time (more than one hour and forty minutes of computation). Thus, I decided to try to reduce the total amount of features by computing an average for the four most correlated ones, much like I did with linear regression at the begging of this report.
-
-```{r}
-rice.train$Combined <- rowMeans(rice.train[, c("Area","Perimeter","Major_Axis_Length","Convex_Area")])
-rice.test$Combined <- rowMeans(rice.test[, c("Area","Perimeter","Major_Axis_Length","Convex_Area")])
-```
-
-##### Ranger Method and Multiprocessing
-
-Another solution would be to use a different random forest fitting method, specifically *ranger* which is just a faster C++ implementation provided by *caret*. Moreover, we could leverage R's multiprocessing capabilities thanks to *doParallel* library.
+Since this method is the most resource intensive by far, I had to leverage R's multiprocessing capabilities using *doParallel* library.
 
 ```{r}
 library(doParallel)
@@ -454,4 +484,19 @@ model_fit <- train(..., allowParallel = TRUE)
 
 # Stop the cluster when done
 stopCluster(cl)
+``` 
+
+
+#### Ranger Method
+
+#### Multicollinearity
+
+This time computing the regression took an inordinate amount of time (more than one hour and forty minutes of computation). Thus, I decided to try to reduce the total amount of features by computing an average for the four most correlated ones, much like I did with linear regression at the begging of this report (we already saw that dropping them yield similar or worse results).
+
+```{r}
+rice.train$Combined <- rowMeans(rice.train[, c("Area","Perimeter","Major_Axis_Length","Convex_Area")])
+rice.test$Combined <- rowMeans(rice.test[, c("Area","Perimeter","Major_Axis_Length","Convex_Area")])
 ```
+
+
+
