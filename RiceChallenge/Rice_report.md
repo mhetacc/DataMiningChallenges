@@ -472,7 +472,7 @@ yhat <- predict(knn_fit, newdata=rice_test)
 
 ### Random Forest
 
-Since this method is the most resource intensive by far, I had to leverage R's multiprocessing capabilities using *doParallel* library.
+Since this method is the most resource intensive by far, I had to leverage R's multiprocessing capabilities using *doParallel* library. I also used the *ranger* method which is a separate R package that provides a faster and more efficient implementation for the random forest algorithm. 
 
 ```{r}
 library(doParallel)
@@ -486,17 +486,67 @@ model_fit <- train(..., allowParallel = TRUE)
 stopCluster(cl)
 ``` 
 
-
-#### Ranger Method
-
-#### Multicollinearity
-
-This time computing the regression took an inordinate amount of time (more than one hour and forty minutes of computation). Thus, I decided to try to reduce the total amount of features by computing an average for the four most correlated ones, much like I did with linear regression at the begging of this report (we already saw that dropping them yield similar or worse results).
+I decided to try to reduce the total amount of features by computing an average for the four most correlated ones, much like I did with linear regression at the begging of this report (we already saw that dropping them yield similar to worse results). Then I trained the model once again with LOOCV on the merged features in parallel. 
 
 ```{r}
 rice.train$Combined <- rowMeans(rice.train[, c("Area","Perimeter","Major_Axis_Length","Convex_Area")])
 rice.test$Combined <- rowMeans(rice.test[, c("Area","Perimeter","Major_Axis_Length","Convex_Area")])
+
+train.control <- trainControl(method  = "LOOCV")
+
+rf_fit <- train(
+  Class~ Minor_Axis_Length + Eccentricity + Extent + Combined,
+  method     = "ranger",
+  tuneLength = 10,
+  trControl  = train.control,
+  metric     = "RMSE",
+  data       = rice_train,
+  allowParallel = TRUE
+)
 ```
 
+```{bash}
+Random Forest 
 
+2810 samples
+   4 predictor
 
+No pre-processing
+Resampling: Leave-One-Out Cross-Validation 
+Summary of sample sizes: 2809, 2809, 2809, 2809, 2809, 2809, ... 
+Resampling results across tuning parameters:
+
+  mtry  splitrule   RMSE       Rsquared   MAE      
+  2     variance    0.2482647  0.7482916  0.1139348
+  2     extratrees  0.2427750  0.7588554  0.1174338
+  3     variance    0.2492458  0.7464555  0.1134565
+  3     extratrees  0.2449248  0.7546129  0.1171018
+  4     variance    0.2508092  0.7435067  0.1129694
+  4     extratrees  0.2460461  0.7523921  0.1173860
+
+Tuning parameter 'min.node.size' was held constant at a value of 5
+RMSE was used to select the optimal model using the smallest value.
+The final values used for the model were mtry = 2, splitrule = extratrees and min.node.size = 5.
+```
+
+![](../RiceChallenge/randomforest.png)
+
+In the optimal configuration yield the following results:
+- $MSE = 0.0589397$
+- $RMSE = 0.2427750$
+
+This result is slightly worse than KNN (trained on all features), and it comes at a significant computational cost: it required a 10-Cores machine (i7-13620H (16) @ 4.90 GHz) twenty-five minutes to fit the model (five times more than KNN). It's also worth noting that KNN was fitted without leveraging R's cluster parallelization.
+
+Since the model is trained for regression, to predict *yaht* we just need to proceed as usual (best model configuration is automatically selected).
+
+```{r}
+yhat <- (predict(rf_fit, newdata=rice_test)>1.5)+1
+```
+
+As for KNN, it is possible to train the model for classification. We just have to convert the target *Class* into a factor, and call the *train* function with *metric = "Accuracy"*.
+
+## Conclusions
+
+The best model so far is KNN with $K = [19,20]$. While slightly more computationally expensive than other methods (with the exception of random forest) it improves MSE by $0.00411343$ over the second best method (LOESS with $span = 0.1$). I decided to use the *yhat* predicted by the model in classification mode, since I felt it was more logically sound.
+
+I decided to not try random forest with all predictors for time constraints.

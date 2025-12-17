@@ -298,101 +298,10 @@ knn <- function(){
   yhat <- (predict(knn_fit, newdata=rice_test)>1.5)+1
 }
 
-random_forest <- function(){
-  set.seed(1)
-  
-  # load library and set validation method
-  library(caret)
-  train.control <- trainControl(method  = "LOOCV")
-
-  ### FOR CLASSIFICATION ###
-  rice_train$Class <- as.factor(rice_train$Class) # necessary, caret will automatically do classification 
-
-  rf_fit <- train(
-    Class~ .,
-    method     = "rf",
-    tuneLength = 10,
-    trControl  = train.control,
-    metric     = "Accuracy",
-    data       = rice_train)
-  
-  rf_predict <- predict(rf_fit, newdata = x[test, ])
-  #mean((rf_predict - y.test)^2)
-  confusionMatrix(rf_predict, y.test)
-
-  # predict actual yhat
-  yhat <- predict(rf_fit, newdata=rice_test)
-
-  ### FOR REGRESSION ###
-  rf_fit <- train(
-    Class~ .,
-    method     = "rf",
-    tuneLength = 10,
-    trControl  = train.control,
-    metric     = "RMSE",
-    data       = rice_train)
-
-  rf_fit
-
-  # predict actual yhat
-  yhat <- (predict(rf_fit, newdata=rice_test)>1.5)+1
-
-}
-
-random_forest_parallel<-function(){
-  set.seed(1)
-  
-  # leverage multicores R capabilites
-  library(doParallel)
-  cl <- makePSOCKcluster(detectCores() - 1)       # use all available cores except one
-registerDoParallel(cl)
-
-  # load library and set validation method
-  library(caret)
-  train.control <- trainControl(method  = "LOOCV")
-
-  ### FOR CLASSIFICATION ###
-  rice_train$Class <- as.factor(rice_train$Class) # necessary, caret will automatically do classification 
-
-  rf_fit <- train(
-    Class~ .,
-    method     = "rf",
-    tuneLength = 10,
-    trControl  = train.control,
-    metric     = "Accuracy",
-    data       = rice_train,
-    allowParallel = TRUE
-    )
-  
-  rf_predict <- predict(rf_fit, newdata = x[test, ])
-  #mean((rf_predict - y.test)^2)
-  confusionMatrix(rf_predict, y.test)
-
-  # predict actual yhat
-  yhat <- predict(rf_fit, newdata=rice_test)
-
-  ### FOR REGRESSION ###
-  rf_fit <- train(
-    Class~ .,
-    method     = "rf",
-    tuneLength = 10,
-    trControl  = train.control,
-    metric     = "RMSE",
-    data       = rice_train,
-    allowParallel = TRUE
-    )
-
-  rf_fit
-
-  # predict actual yhat
-  yhat <- (predict(rf_fit, newdata=rice_test)>1.5)+1
-
-
-  stopCluster(cl)
-}
-
 
 random_forest_parallel_ranger<-function(){
+  # ranger is a faster implementation for the random forest
+  
   set.seed(1)
   
   # collinearity
