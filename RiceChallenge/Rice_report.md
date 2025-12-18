@@ -163,7 +163,7 @@ Another approach is to drop variables altogether, but first we measure their var
       1207.246932        231.583311        362.191786        183.891990         54.613735       1103.660065          1.110601 
 ```
 
-As a rule of thumb *VIF* values over ten are considered bad, so now we will iteratively drop values and try to refit the model to see if we can improve the situation.
+As a rule of thumb, *VIF* values over ten are considered bad, so now we will iteratively drop values and try to refit the model to see if we can improve the situation.
 
 - **Drop Area:**
   - VIFs = 

@@ -2,6 +2,200 @@ setwd("~/Documents/Data Mining/DataMiningChallenges/PhoneUserChallenge")
 phone_train <- read.csv("phone_train.csv")
 phone_test <- read.csv("phone_validation.csv")
 
+plotcalls_over_everything <- function(){
+
+#######  NUMBER OF CALLS  ############
+months <- paste0("q0", 1:9)
+
+for (m in months) {
+  peak_col    <- paste0(m, ".out.ch.peak")
+  offpeak_col <- paste0(m, ".out.ch.offpeak")
+  total_col   <- paste0(m, ".out.ch.tot")   # new column name
+
+  phone_test[[total_col]] <- rowSums(phone_test[, c(peak_col, offpeak_col)], na.rm = TRUE)
+}
+
+# PLOT NUM OF CALLS OVER MONTHS
+months <- paste0("q0", 1:9, ".out.ch.tot")  # your total call columns
+
+# Sum of calls per month
+monthly_totals <- colSums(phone_test[, months], na.rm = TRUE)
+
+# Create a dataframe for plotting
+df_plot <- data.frame(
+  month = months,
+  total_calls = monthly_totals
+)
+
+# plot
+library(ggplot2)
+
+  # Plot with custom labels
+ggplot(df_plot, aes(x = month, y = total_calls)) +
+  geom_col(fill = "steelblue") +
+  labs(title = "Total Calls per Month",
+       x = "Month",
+       y = "Total Calls") +
+  scale_x_discrete(labels = paste("Month", 1:9)) +
+  theme_minimal()
+
+# NUM CALLS OVER SEX
+
+# NUM CALLS OVER PLAN
+
+# NUM CALLS OVER PAYMETHOD
+
+########## CALL TIME ############
+
+months <- paste0("q0", 1:9)
+
+for (m in months) {
+  peak_col    <- paste0(m, ".out.dur.peak")
+  offpeak_col <- paste0(m, ".out.dur.offpeak")
+  total_col   <- paste0(m, ".out.dur.tot")   # new column name
+
+  phone_test[[total_col]] <- rowSums(phone_test[, c(peak_col, offpeak_col)], na.rm = TRUE)
+}
+
+# PLOT CALL TIME OVER MONTHS
+months <- paste0("q0", 1:9, ".out.dur.tot")  # your total call columns
+
+# Sum of calls per month
+monthly_totals <- colSums(phone_test[, months], na.rm = TRUE)
+
+# Create a dataframe for plotting
+df_plot <- data.frame(
+  month = months,
+  total_time = monthly_totals
+)
+
+# plot
+library(ggplot2)
+
+  # Plot with custom labels
+ggplot(df_plot, aes(x = month, y = total_time)) +
+  geom_col(fill = "steelblue") +
+  labs(title = "Call Time per Month",
+       x = "Month",
+       y = "Call Time") +
+  scale_x_discrete(labels = paste("Month", 1:9)) +
+  theme_minimal()
+
+# CALL TIME OVER SEX
+
+# make total 
+months <- paste0("q0", 1:9, ".out.dur.tot")
+phone_test$total_call_time_months <- rowSums(phone_test[, months])
+
+#tot_by_sex <- aggregate(total_call_time_months ~ sex, data = phone_test, sum, na.rm = TRUE)
+
+library(dplyr)
+avg_by_sex <- phone_test %>%
+  group_by(sex) %>%
+  summarise(
+    n_customers   = n(),
+    total_call_time   = sum(total_call_time_months, na.rm = TRUE),
+    avg_call_time = total_call_time / n_customers
+  )
+
+# remove top 1%
+
+library(dplyr)
+
+# Compute 99th percentile threshold
+threshold <- quantile(phone_test$total_call_time_months, 0.99, na.rm = TRUE)
+
+# Filter out top 1% and summarise
+avg_by_sex <- phone_test %>%
+  filter(total_call_time_months <= threshold) %>%  # remove top 1%
+  group_by(sex) %>%
+  summarise(
+    n_customers     = n(),
+    total_call_time = sum(total_call_time_months, na.rm = TRUE),
+    avg_call_time   = total_call_time / n_customers
+  )
+
+# CALL TIME OVER PLAN
+
+# Compute 99th percentile threshold
+threshold <- quantile(phone_test$total_call_time_months, 0.99, na.rm = TRUE)
+
+# Filter out top 1% and summarise
+avg_by_plan <- phone_test %>%
+  filter(total_call_time_months <= threshold) %>%  # remove top 1%
+  group_by(tariff.plan) %>%
+  summarise(
+    n_customers     = n(),
+    total_call_time = sum(total_call_time_months, na.rm = TRUE),
+    avg_call_time   = total_call_time / n_customers
+  )
+
+# CALL TIME OVER PAYMETHOD
+
+# Compute 99th percentile threshold
+threshold <- quantile(phone_test$total_call_time_months, 0.99, na.rm = TRUE)
+
+# Filter out top 1% and summarise
+avg_by_pymethod <- phone_test %>%
+  filter(total_call_time_months <= threshold) %>%  # remove top 1%
+  group_by(payment.method) %>%
+  summarise(
+    n_customers     = n(),
+    total_call_time = sum(total_call_time_months, na.rm = TRUE),
+    avg_call_time   = total_call_time / n_customers
+  )
+
+# CALL TIME OVER ZONE
+
+avg_by_zone <- phone_test %>%
+  filter(total_call_time_months <= threshold) %>%  # remove top 1%
+  group_by(activation.zone) %>%
+  summarise(
+    n_customers     = n(),
+    total_call_time = sum(total_call_time_months, na.rm = TRUE),
+    avg_call_time   = total_call_time / n_customers
+  )
+  avg_by_zone
+
+# CALL TIME OVER CHANNEL
+
+avg_by_channel <- phone_test %>%
+  filter(total_call_time_months <= threshold) %>%  # remove top 1%
+  group_by(activation.channel) %>%
+  summarise(
+    n_customers     = n(),
+    total_call_time = sum(total_call_time_months, na.rm = TRUE),
+    avg_call_time   = total_call_time / n_customers
+  )
+avg_by_channel
+
+# CALL TIME OVER VALUEADD 1
+
+avg_by_addV1 <- phone_test %>%
+  filter(total_call_time_months <= threshold) %>%  # remove top 1%
+  group_by(vas1) %>%
+  summarise(
+    n_customers     = n(),
+    total_call_time = sum(total_call_time_months, na.rm = TRUE),
+    avg_call_time   = total_call_time / n_customers
+  )
+  avg_by_addV1
+
+# CALL TIME OVER VALUEADD 2
+
+avg_by_addV2 <- phone_test %>%
+  filter(total_call_time_months <= threshold) %>%  # remove top 1%
+  group_by(vas2) %>%
+  summarise(
+    n_customers     = n(),
+    total_call_time = sum(total_call_time_months, na.rm = TRUE),
+    avg_call_time   = total_call_time / n_customers
+  )
+  avg_by_addV2
+
+
+}
+
 linearfit <- function(){
   x <- model.matrix(y ~ ., data=phone_train)[, -1]  
   y <- phone_train$y 
