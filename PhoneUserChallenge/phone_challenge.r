@@ -258,6 +258,12 @@ loess <- function(){
 
 knn <- function(){
   set.seed(1)
+
+  # leverage multicores R capabilites
+  library(doParallel)
+  cl <- makePSOCKcluster(detectCores() - 1)       # use all available cores except one
+  registerDoParallel(cl)
+
   
   # load library and set validation method
   library(caret)
@@ -273,7 +279,9 @@ knn <- function(){
     trControl  = train.control,
     preProcess = c("center","scale"),    # normalized
     metric     = "Accuracy",
-    data       = phone_train)
+    data       = phone_train,
+    allowParallel = TRUE
+    )
   
   knn_predict <- predict(knn_fit, newdata = x[test, ])
   #mean((knn_predict - y.test)^2)
@@ -290,12 +298,18 @@ knn <- function(){
     trControl  = train.control,
     preProcess = c("center","scale"),    # normalized
     metric     = "RMSE",
-    data       = phone_train)
+    data       = phone_train,
+    allowParallel = TRUE
+    )
 
   knn_fit
 
   # predict actual yhat
   yhat <- (predict(knn_fit, newdata=phone_test)>1.5)+1
+
+
+
+  stopCluster(cl)
 }
 
 
@@ -311,7 +325,7 @@ random_forest_parallel_ranger<-function(){
   # leverage multicores R capabilites
   library(doParallel)
   cl <- makePSOCKcluster(detectCores() - 1)       # use all available cores except one
-registerDoParallel(cl)
+  registerDoParallel(cl)
 
   # load library and set validation method
   library(caret)
