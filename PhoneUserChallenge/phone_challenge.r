@@ -12,14 +12,14 @@ for (m in months) {
   offpeak_col <- paste0(m, ".out.ch.offpeak")
   total_col   <- paste0(m, ".out.ch.tot")   # new column name
 
-  phone_test[[total_col]] <- rowSums(phone_test[, c(peak_col, offpeak_col)], na.rm = TRUE)
+  phone_train[[total_col]] <- rowSums(phone_train[, c(peak_col, offpeak_col)], na.rm = TRUE)
 }
 
 # PLOT NUM OF CALLS OVER MONTHS
 months <- paste0("q0", 1:9, ".out.ch.tot")  # your total call columns
 
 # Sum of calls per month
-monthly_totals <- colSums(phone_test[, months], na.rm = TRUE)
+monthly_totals <- colSums(phone_train[, months], na.rm = TRUE)
 
 # Create a dataframe for plotting
 df_plot <- data.frame(
@@ -54,14 +54,14 @@ for (m in months) {
   offpeak_col <- paste0(m, ".out.dur.offpeak")
   total_col   <- paste0(m, ".out.dur.tot")   # new column name
 
-  phone_test[[total_col]] <- rowSums(phone_test[, c(peak_col, offpeak_col)], na.rm = TRUE)
+  phone_train[[total_col]] <- rowSums(phone_train[, c(peak_col, offpeak_col)], na.rm = TRUE)
 }
 
 # PLOT CALL TIME OVER MONTHS
 months <- paste0("q0", 1:9, ".out.dur.tot")  # your total call columns
 
 # Sum of calls per month
-monthly_totals <- colSums(phone_test[, months], na.rm = TRUE)
+monthly_totals <- colSums(phone_train[, months], na.rm = TRUE)
 
 # Create a dataframe for plotting
 df_plot <- data.frame(
@@ -85,28 +85,28 @@ ggplot(df_plot, aes(x = month, y = total_time)) +
 
 # make total 
 months <- paste0("q0", 1:9, ".out.dur.tot")
-phone_test$total_call_time_months <- rowSums(phone_test[, months])
+phone_train$total_call_time_months <- rowSums(phone_train[, months])
 
-#tot_by_sex <- aggregate(total_call_time_months ~ sex, data = phone_test, sum, na.rm = TRUE)
+#tot_by_sex <- aggregate(total_call_time_months ~ sex, data = phone_train, sum, na.rm = TRUE)
 
 library(dplyr)
-avg_by_sex <- phone_test %>%
+avg_by_sex <- phone_train %>%
   group_by(sex) %>%
   summarise(
     n_customers   = n(),
     total_call_time   = sum(total_call_time_months, na.rm = TRUE),
     avg_call_time = total_call_time / n_customers
   )
-
+avg_by_sex
 # remove top 1%
 
 library(dplyr)
 
 # Compute 99th percentile threshold
-threshold <- quantile(phone_test$total_call_time_months, 0.99, na.rm = TRUE)
+threshold <- quantile(phone_train$total_call_time_months, 0.99, na.rm = TRUE)
 
 # Filter out top 1% and summarise
-avg_by_sex <- phone_test %>%
+avg_by_sex <- phone_train %>%
   filter(total_call_time_months <= threshold) %>%  # remove top 1%
   group_by(sex) %>%
   summarise(
@@ -114,14 +114,28 @@ avg_by_sex <- phone_test %>%
     total_call_time = sum(total_call_time_months, na.rm = TRUE),
     avg_call_time   = total_call_time / n_customers
   )
+  avg_by_sex
+
+# Log compress
+library(dplyr)
+
+avg_log_by_sex <- phone_train %>%
+  group_by(sex) %>%
+  summarise(
+    n_customers        = n(),
+    total_call_time    = sum(total_call_time_months, na.rm = TRUE),
+    avg_log_call_time  = mean(log(total_call_time_months + 1), na.rm = TRUE)
+  )
+avg_log_by_sex
+
 
 # CALL TIME OVER PLAN
 
 # Compute 99th percentile threshold
-threshold <- quantile(phone_test$total_call_time_months, 0.99, na.rm = TRUE)
+threshold <- quantile(phone_train$total_call_time_months, 0.99, na.rm = TRUE)
 
 # Filter out top 1% and summarise
-avg_by_plan <- phone_test %>%
+avg_by_plan <- phone_train %>%
   filter(total_call_time_months <= threshold) %>%  # remove top 1%
   group_by(tariff.plan) %>%
   summarise(
@@ -129,14 +143,14 @@ avg_by_plan <- phone_test %>%
     total_call_time = sum(total_call_time_months, na.rm = TRUE),
     avg_call_time   = total_call_time / n_customers
   )
-
+avg_by_plan
 # CALL TIME OVER PAYMETHOD
 
 # Compute 99th percentile threshold
-threshold <- quantile(phone_test$total_call_time_months, 0.99, na.rm = TRUE)
+threshold <- quantile(phone_train$total_call_time_months, 0.99, na.rm = TRUE)
 
 # Filter out top 1% and summarise
-avg_by_pymethod <- phone_test %>%
+avg_by_pymethod <- phone_train %>%
   filter(total_call_time_months <= threshold) %>%  # remove top 1%
   group_by(payment.method) %>%
   summarise(
@@ -144,10 +158,10 @@ avg_by_pymethod <- phone_test %>%
     total_call_time = sum(total_call_time_months, na.rm = TRUE),
     avg_call_time   = total_call_time / n_customers
   )
-
+avg_by_pymethod
 # CALL TIME OVER ZONE
 
-avg_by_zone <- phone_test %>%
+avg_by_zone <- phone_train %>%
   filter(total_call_time_months <= threshold) %>%  # remove top 1%
   group_by(activation.zone) %>%
   summarise(
@@ -159,7 +173,7 @@ avg_by_zone <- phone_test %>%
 
 # CALL TIME OVER CHANNEL
 
-avg_by_channel <- phone_test %>%
+avg_by_channel <- phone_train %>%
   filter(total_call_time_months <= threshold) %>%  # remove top 1%
   group_by(activation.channel) %>%
   summarise(
@@ -171,7 +185,7 @@ avg_by_channel
 
 # CALL TIME OVER VALUEADD 1
 
-avg_by_addV1 <- phone_test %>%
+avg_by_addV1 <- phone_train %>%
   filter(total_call_time_months <= threshold) %>%  # remove top 1%
   group_by(vas1) %>%
   summarise(
@@ -183,7 +197,7 @@ avg_by_addV1 <- phone_test %>%
 
 # CALL TIME OVER VALUEADD 2
 
-avg_by_addV2 <- phone_test %>%
+avg_by_addV2 <- phone_train %>%
   filter(total_call_time_months <= threshold) %>%  # remove top 1%
   group_by(vas2) %>%
   summarise(

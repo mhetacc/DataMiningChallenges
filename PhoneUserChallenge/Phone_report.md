@@ -28,10 +28,10 @@ Considering that the target is *monthly call time* we can make the hypothesis th
 ### Calls Over Everything
 
 Let's try to see if the amount and time of calls are related to other features (for example sex) or not.
-First we want to see the total calls taken and the total call time over nine months.
+First we want to see the total calls taken and the total call time over nine months. All the test are done on the training set to prevent data leakage.
 
-![](./monthy_calls.png)
-|[](./montly_calltime.png)
+![](./monthly_calls.png)
+|[](./monthly_calltime.png)
 
 It is very interesting to see that the two graphs, while differing greatly in Y-values magnitude, are almost identical from a trend standpoint, hinting at a strong correlation between number of calls and time spent calling. If proven (for example with a correlation matrix), and considering our target, the amount of calls per month can probably be dropped.
 
@@ -40,41 +40,41 @@ Then we would like to know if gender plays any role at all in estimating the tot
 ```{bash}
   sex   n_customers total_call_time avg_call_time
   <chr>       <int>           <dbl>         <dbl>
-1 B           10916      1104470553       101179.
-2 F            2115       116774293        55212.
-3 M            7588       511870106        67458.
+1 B            5266       557266412       105823.
+2 F            1030        62493290        60673.
+3 M            3704       242226228        65396.
 ```
 
-On average, with our data, men's calls seem to last 22% longer. We should ask ourselves if this is a significant behaviour of if its significance is hindered by some outliers. We can try to mitigate their effect by filtering out the top 1%.
+On average, with our data, men's calls seem to last 8% longer. We should ask ourselves if this is a significant behaviour of if its significance is hindered by some outliers. We can try to mitigate their effect by filtering out the top 1%.
 
 ```{bash}
   sex   n_customers total_call_time avg_call_time
   <chr>       <int>           <dbl>         <dbl>
-1 B           10794      1000270590        92669.
-2 F            2102       104602520        49763.
-3 M            7516       448349066        59653.
+1 B            5201       498846876        95914.
+2 F            1025        57203392        55808.
+3 M            3674       215801665        58738.
 ```
 
-Once again, we see that man's calls seems to last roughly 20% longer than women's.
+Once again, we see that man's calls seems to last roughly5% longer than women's.
 Let's try to be more aggressive and cut off the top 10%.
 
 ```{bash}
   sex   n_customers total_call_time avg_call_time
   <chr>       <int>           <dbl>         <dbl>
-1 B            9566       565484758        59114.
-2 F            1995        67297732        33733.
-3 M            6996       265301526        37922.
+1 B            4595       276063673        60079.
+2 F             960        32400501        33751.
+3 M            3445       130747836        37953.
 ```
 
-Here we see just a 10% increase in call time, but still it seems that men tend to call longer than women.
+Here we see an even higher 10% increase in call time fro men.
 Lastly, we could try to reduce the impact of outliers by compressing the data logarithmically instead than cutting off the top 1%. 
 
 ```{bash}
   sex   n_customers total_call_time avg_log_call_time
   <chr>       <int>           <dbl>             <dbl>
-1 B           10916      1104470553              9.97
-2 F            2115       116774293              8.22
-3 M            7588       511870106              8.66
+1 B            5266       557266412             10.0 
+2 F            1030        62493290              8.24
+3 M            3704       242226228              8.58
 ```
 
 We still see an increase in call times for men even on compressed values. We can conclude that, for our customers, men tend to call for longer. 
@@ -84,19 +84,19 @@ We can do something similar for plan and paying method. We will cut off the top 
 ```{bash}
   tariff.plan n_customers total_call_time avg_call_time
         <int>       <int>           <dbl>         <dbl>
-1           3        1587        85750654        54033.
-2           4         205        33161509       161763.
-3           6        1355       160843858       118704.
-4           7        7681       996406122       129723.
-5           8        9584       277060033        28909.
+1           3         781        44811041        57376.
+2           4          83        10575009       127410.
+3           6         724        92214268       127368.
+4           7        3564       489635465       137384.
+5           8        4748       134616150        28352.
 ```
 
 ```{bash}
   payment.method          n_customers total_call_time avg_call_time
   <chr>                         <int>           <dbl>         <dbl>
-1 Bollettino Postale             3079       303424335        98546.
-2 Carta di Credito              10014       648527188        64762.
-3 Domiciliazione Bancaria        7319       601270653        82152.
+1 Bollettino Postale             1555       145651774        93667.
+2 Carta di Credito               4747       332659385        70078.
+3 Domiciliazione Bancaria        3598       293540774        81584.
 ```
 
 There seem to be quite a bit of variance in call times compared to the tariff plan, which would make sense: some plans may be geared toward calling, while others are more suited for someone that sends a lot of SMS. We can see some variance on payment method too, even tho one would expect an automatic one (e.g., card) to incentivize higher phone usage. With our data this does not seem to be the case (at least as far as call times are concerned).
@@ -106,41 +106,40 @@ Lastly, lets see if there seem to be some difference in call times between activ
 ```{bash}
   activation.zone n_customers total_call_time avg_call_time
             <int>       <int>           <dbl>         <dbl>
-1               0           1            8113         8113 
-2               1        7308       571962532        78265.
-3               2        6455       455166680        70514.
-4               3        4779       381281835        79783.
-5               4        1869       144803016        77476.
+1               1        3507       288670845        82313.
+2               2        3130       213438509        68191.
+3               3        2342       197941555        84518.
+4               4         921        71801024        77960.
 ```
 
 ```{bash}
   activation.channel n_customers total_call_time avg_call_time
                <int>       <int>           <dbl>         <dbl>
-1                  2         301        27312569        90739.
-2                  3         842        69846016        82953.
-3                  4          61         5955533        97632.
-4                  5       14579      1251373700        85834.
-5                  6          81         7906105        97606.
-6                  7        1394       127968093        91799.
-7                  8         248        21522757        86785.
-8                  9        2906        41337403        14225.
+1                  2         130        10643060        81870.
+2                  3         408        36663577        89862.
+3                  4          31         2369822        76446.
+4                  5        7135       623961079        87451.
+5                  6          47         4352853        92614.
+6                  7         652        62777153        96284.
+7                  8         111        12074180       108776.
+8                  9        1386        19010209        13716.
 ```
 
 ```{bash}
   vas1  n_customers total_call_time avg_call_time
   <chr>       <int>           <dbl>         <dbl>
-1 N           15133      1061538694        70147.
-2 Y            5279       491683482        93140.
+1 N            7450       526620961        70687.
+2 Y            2450       245230972       100094.
 ```
 
 ```{bash}
   vas2  n_customers total_call_time avg_call_time
   <chr>       <int>           <dbl>         <dbl>
-1 N           19265      1419139536        73664.
-2 Y            1147       134082640       116899.
+1 N            9279       695404226        74944.
+2 Y             621        76447707       123104.
 ```
 
-Activation zone and channel seem to have little influence on call times (with the exception of channel eight and zone zero). On the other hand, customers that have activated either first or second added-value services clearly do way longer calls.
+Activation zone and channel seem to have some influence on call times, with the exception of zone eight, whose call times are way lower. On the other hand, customers that have activated either first or second added-value services clearly call for longer.
 
 ### Monthly Call Time Skewness
 
