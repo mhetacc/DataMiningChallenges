@@ -79,6 +79,8 @@ Lastly, we could try to reduce the impact of outliers by compressing the data lo
 
 We still see an increase in call times for men even on compressed values. We can conclude that, for our customers, men tend to call for longer. 
 
+Then, it would be interesting to see how much age factors in call times.
+
 We can do something similar for plan and paying method. We will cut off the top 1%.
 
 ```{bash}
@@ -141,7 +143,7 @@ Lastly, lets see if there seem to be some difference in call times between activ
 
 Activation zone and channel seem to have some influence on call times, with the exception of zone eight, whose call times are way lower. On the other hand, customers that have activated either first or second added-value services clearly call for longer.
 
-### Monthly Call Time Skewness
+### Skewness
 
 Call time data is usually positively skewed, with many users having low usage and a small number of user with very high usage (e.g.,50.000 seconds).
 This is easily verifiable at a glance if we try to plot the monthly call time or, better yet, with an histogram.
@@ -153,7 +155,67 @@ A common method to compress such data is by applying a logarithmic function to i
 
 ![](phone_log_y_hist.png)
 
+Let's now check wether other data exhibit similar characteristics by calculating the skewness with the *e1071* package.
 
+```{bash}
+        tariff.plan  activation.channel     q01.out.ch.peak    q01.out.dur.peak    q01.out.val.peak  q01.out.ch.offpeak 
+          -2.026605            1.073333            4.930308            5.883900           10.158610           10.442799 
+q01.out.dur.offpeak q01.out.val.offpeak       q01.in.ch.tot      q01.in.dur.tot          q01.ch.sms           q01.ch.cc 
+           9.336163           31.977903            4.322467            3.615376           37.220847           12.493878 
+    q02.out.ch.peak    q02.out.dur.peak    q02.out.val.peak  q02.out.ch.offpeak q02.out.dur.offpeak q02.out.val.offpeak 
+           4.011558            5.026925            6.120357            9.636244            9.202850           23.789047 
+      q02.in.ch.tot      q02.in.dur.tot          q02.ch.sms           q02.ch.cc     q03.out.ch.peak    q03.out.dur.peak 
+           3.657302            3.444048           38.464828           10.697464            3.742071            4.194271 
+   q03.out.val.peak  q03.out.ch.offpeak q03.out.dur.offpeak q03.out.val.offpeak       q03.in.ch.tot      q03.in.dur.tot 
+           4.144170            8.709344            9.948054           25.074765            3.359255            3.280295 
+         q03.ch.sms           q03.ch.cc     q04.out.ch.peak    q04.out.dur.peak    q04.out.val.peak  q04.out.ch.offpeak 
+          35.231226           12.146903            3.726583            4.415209            3.988589            9.068477 
+q04.out.dur.offpeak q04.out.val.offpeak       q04.in.ch.tot      q04.in.dur.tot          q04.ch.sms           q04.ch.cc 
+          12.366396           10.517232            3.362859            3.660378           33.513288           12.284952 
+    q05.out.ch.peak    q05.out.dur.peak    q05.out.val.peak  q05.out.ch.offpeak q05.out.dur.offpeak q05.out.val.offpeak 
+           3.578910            4.056863            4.242749           12.129119           12.598793           11.390509 
+      q05.in.ch.tot      q05.in.dur.tot          q05.ch.sms           q05.ch.cc     q06.out.ch.peak    q06.out.dur.peak 
+           3.450009            3.165951           38.804264            9.085293            3.364608            4.622265 
+   q06.out.val.peak  q06.out.ch.offpeak q06.out.dur.offpeak q06.out.val.offpeak       q06.in.ch.tot      q06.in.dur.tot 
+           4.037063           15.035554           12.511158           10.149751            3.386507            3.621934 
+         q06.ch.sms           q06.ch.cc     q07.out.ch.peak    q07.out.dur.peak    q07.out.val.peak  q07.out.ch.offpeak 
+          28.668984           13.747535            3.157588            4.088846            3.830199           10.405367 
+q07.out.dur.offpeak q07.out.val.offpeak       q07.in.ch.tot      q07.in.dur.tot          q07.ch.sms           q07.ch.cc 
+          12.907377           10.128761            3.237636            3.192192           28.628610           16.762409 
+    q08.out.ch.peak    q08.out.dur.peak    q08.out.val.peak  q08.out.ch.offpeak q08.out.dur.offpeak q08.out.val.offpeak 
+           3.963771            4.131527            4.117853            9.256204           11.536043           11.204808 
+      q08.in.ch.tot      q08.in.dur.tot          q08.ch.sms           q08.ch.cc     q09.out.ch.peak    q09.out.dur.peak 
+           3.972012            3.953185           20.317293            8.946827            2.927636            3.781970 
+   q09.out.val.peak  q09.out.ch.offpeak q09.out.dur.offpeak q09.out.val.offpeak       q09.in.ch.tot      q09.in.dur.tot 
+           3.646469           10.344301           15.974234           11.674903            2.728376            3.152212 
+         q09.ch.sms           q09.ch.cc                   y 
+          16.048910           13.034136           10.820427 
+```
+
+We can ignore tariff plan and activation channel values since they are categorical features (already encoded into numerical ones). We can see that all monthly-based data (calls, call times, SMS, costs, etc) are highly positively skewed. To manage this problem we can either transform them (log, square root or Box-Cox transform), or use model less sensitive to this problematic (such as random forest, Gamma/Poisson or quantile regression). Methods like linear. ridge or lasso regression, and even some non-parametric ones like k-NN are, on the other hand, not ideal. 
+
+## Correlation Matrix
+
+Since *cor=(data)* takes only numerical values, we can use the *model.matrix* function. We do not need the target feature.
+
+```{r}
+x <- model.matrix( ~ ., phone_train)[, -1]
+cor(x)
+```
+
+After a bit of processing we get the following:
+1. Age is roughly correlated to all call-related monthly features (amount of call, call time, calls to call center, etc) by 20%. Some examples follow:
+   - Month 9, number of outgoing calls off-peak to age correlation = 18%
+   - Month 4, number of incoming calls total to age correlation = 30%
+   - Month 1, time of outgoing calls off-peak to age correlation = 24%
+   - Month 6, number of calls to call centers to age correlation  = 10%
+2. First and second value-added services are correlated to some, not all, monthly features by roughly 10%
+3. The only features that share significant correlation are all call-related monthly features, which is not at all surprising. Some example follow:
+   -  Month 4, outgoing call time and call expenses correlation = 97%
+   -  Month 3, outgoing call time and call expenses correlation = 87%
+   -  Month 7, call expenses and outgoing call time correlation = 57%
+
+One of the ways to handle collinearity is to either drop or merge the afflicted features, but in this specific situation I would rather not do the former since the monthly call time is exactly what we aim to predict. On the other hand, predicting on the median monthly call time could yield good results.
 
 # Prediction
 

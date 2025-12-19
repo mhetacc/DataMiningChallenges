@@ -2,6 +2,22 @@ setwd("~/Documents/Data Mining/DataMiningChallenges/PhoneUserChallenge")
 phone_train <- read.csv("phone_train.csv")
 phone_test <- read.csv("phone_validation.csv")
 
+
+skewnesscheck <- function(){
+  library(e1071)
+
+  numeric_cols <- sapply(phone_train, is.numeric)
+  skewed_features <- sapply(phone_train[, numeric_cols], function(x) skewness(x, na.rm = TRUE))
+
+  # Identify highly skewed features (e.g., skewness > 1 or < -1)
+  highly_skewed <- names(skewed_features[abs(skewed_features) > 1])
+
+  # Print the highly skewed features and their skewness values
+  print(highly_skewed)
+  print(skewed_features[highly_skewed])
+}
+
+
 plotcalls_over_everything <- function(){
 
 #######  NUMBER OF CALLS  ############
