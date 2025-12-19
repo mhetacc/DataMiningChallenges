@@ -215,38 +215,89 @@ After a bit of processing we get the following:
    -  Month 3, outgoing call time and call expenses correlation = 87%
    -  Month 7, call expenses and outgoing call time correlation = 57%
 
-One of the ways to handle collinearity is to either drop or merge the afflicted features, but in this specific situation I would rather not do the former since the monthly call time is exactly what we aim to predict. On the other hand, predicting on the median monthly call time could yield good results.
+One of the ways to handle collinearity is to either drop or merge the afflicted features, but in this specific situation I would rather not do the former since monthly call time is exactly what we aim to predict. On the other hand, predicting on the median monthly call time could yield good results.
+
+## Linear Regression Insights
+
+A good preliminary analysis can be done by plotting a linear regression fit.
+
+![](./4plots_ln.png)
+
+What we can infer from the plots above is that our data presents high heteroskedasticity, skewness and in general that our data is not normally distributed. There are also potential outliers and influential points that could distort the model 8(for example point 9853).
+
+Features that contribute strongly to the model are the following.
+
+```{bash}
+                                      t value Pr(>|t|)    
+(Intercept)                            15.136  < 2e-16 ***
+tariff.plan                           -23.320  < 2e-16 ***
+payment.methodDomiciliazione Bancaria   2.029 0.042513 *  
+age                                    -3.290 0.001004 ** 
+activation.channel                      2.445 0.014485 *  
+vas1Y                                   2.637 0.008389 ** 
+q01.out.ch.peak                        -2.998 0.002725 ** 
+q01.out.dur.offpeak                     3.006 0.002652 ** 
+q01.out.val.offpeak                    -6.760 1.46e-11 ***
+q03.out.val.peak                        3.534 0.000411 ***
+q03.in.dur.tot                         -4.009 6.15e-05 ***
+q04.out.dur.peak                       -3.183 0.001460 ** 
+q04.out.val.peak                        2.320 0.020335 *  
+q04.out.ch.offpeak                     -4.137 3.55e-05 ***
+q05.out.ch.offpeak                      2.194 0.028282 *  
+q05.out.dur.offpeak                    -2.375 0.017556 *  
+q05.out.val.offpeak                     3.723 0.000198 ***
+q05.in.ch.tot                          -3.401 0.000674 ***
+q05.in.dur.tot                          2.231 0.025735 *  
+q06.out.dur.peak                       -3.182 0.001469 ** 
+q06.out.val.peak                        2.791 0.005260 ** 
+q06.out.ch.offpeak                     -4.226 2.40e-05 ***
+q06.out.val.offpeak                     4.772 1.85e-06 ***
+q06.in.dur.tot                          2.642 0.008249 ** 
+q07.out.dur.peak                        3.250 0.001160 ** 
+q07.in.ch.tot                           4.881 1.07e-06 ***
+q07.in.dur.tot                         -4.645 3.45e-06 ***
+q08.out.ch.peak                         2.856 0.004293 ** 
+q08.out.val.peak                       -4.434 9.33e-06 ***
+q08.out.ch.offpeak                     -4.099 4.19e-05 ***
+q08.out.dur.offpeak                     4.495 7.04e-06 ***
+q08.out.val.offpeak                     2.112 0.034720 * 
+q09.out.ch.peak                        -6.673 2.64e-11 ***
+q09.out.dur.peak                       -0.825 0.409148    
+q09.out.val.peak                       11.179  < 2e-16 ***
+q09.out.ch.offpeak                     10.026  < 2e-16 ***
+q09.out.dur.offpeak                    18.656  < 2e-16 ***
+q09.out.val.offpeak                    -4.800 1.61e-06 ***
+q09.ch.cc                              -2.097 0.036019 *  
+```
+
+We can see that, for the most part, relevant features are the one related to monthly calls. It is interesting to notice that the second month does not seem to hold much weight, even thought it presents a similar amount of call data compared to the first.
+
+## Principal Components
+
+Data as-is can be transformed into 101 principal components, and the cumulative proportion with only two is approximately 0.45. To get to 99% of explained variance we need 69 components.
+
+![](./PCAphone.png)
+
+Once again we see sign of heteroskedasticity and other non-normal data distribution problematics.
+
+## Preliminary Observations Conclusions
+
+First and foremost we want to filter out less useful data (for example SMS amount), then we either want to transform it (for example log or Box-Cox) or use some robust regression, like quantile or tree-based approaches.
+
+## Scatterplot?
+
+
 
 # Prediction
 
 ## Linear Regression
 
-### Heteroskedasticity
-
-One preliminary way to check whether there is some form of heteroskedasticity is by computing a residual plot.
-
-```{r}
-fit <- lm(y ~ ., data = train)
-
-plot(fitted(fit), resid(fit),
-     xlab = "Fitted values",
-     ylab = "Residuals",
-     main = "Residuals vs Fitted")
-abline(h = 0, lty = 2)
-```
-
-As we can see there is a evident funnel shape, often sign of heteroskedasticity. To prove it more formally we can check p-values.
-
-```{r}
-library(lmtest)
-bptest(fit)
-```
 
 ## KNN
 
 Let's start with a baseline prediction using a simple KNN model for regression. I first tried to fit all the data, without logarithmically transform the target, but I had to change the validation method from Leave-One-Out-Cross-Validation to just Cross-Validation for lack of memory.
 
-```{rbash}
+```{bash}
 k-Nearest Neighbors 
 
 10000 samples
