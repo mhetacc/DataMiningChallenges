@@ -113,7 +113,7 @@ Let's try to be more aggressive and cut off the top 10%.
 3 M            3445       130747836        37953.
 ```
 
-Here we see an even higher 10% increase in call time fro men.
+Here we see an even higher 10% increase in call time for men.
 Lastly, we could try to reduce the impact of outliers by compressing the data logarithmically instead than cutting off the top 1%. 
 
 ```{bash}
@@ -125,9 +125,6 @@ Lastly, we could try to reduce the impact of outliers by compressing the data lo
 ```
 
 We still see an increase in call times for men even on compressed values. We can conclude that, for our customers, men tend to call for longer. 
-
-Then, it would be interesting to see how much age factors in call times.
-
 We can do something similar for plan and paying method. We will cut off the top 1%.
 
 ```{bash}
@@ -318,6 +315,43 @@ q09.ch.cc                              -2.097 0.036019 *
 ```
 
 We can see that, for the most part, relevant features are the one related to monthly calls. It is interesting to notice that the second month does not seem to hold much weight, even thought it presents a similar amount of call data compared to the first.
+
+Log transforming the target yield better results, with a general normalization of the values. 
+
+![](./4plots_ln_log.png)
+
+Here follows the features that [TODO]
+
+```{bash}
+                                      Pr(>|t|)    
+(Intercept)                            < 2e-16 ***
+tariff.plan                            < 2e-16 ***
+payment.methodCarta di Credito        0.007256 ** 
+payment.methodDomiciliazione Bancaria 0.001023 ** 
+sexF                                  0.000623 ***
+sexM                                  6.81e-09 ***
+age                                    < 2e-16 ***
+activation.channel                    4.42e-07 ***
+vas1Y                                 2.43e-10 ***
+q01.out.ch.peak                       0.004972 ** 
+q01.in.dur.tot                        0.009498 ** 
+q03.out.ch.peak                       0.016320 *   
+q04.out.dur.peak                      0.002052 ** 
+q04.out.val.peak                      0.012237 *  
+q04.out.ch.offpeak                    0.031593 *  
+q04.ch.cc                             0.036098 *   
+q05.in.ch.tot                         0.041127 *  
+q06.out.val.offpeak                   0.032902 *  
+q07.out.dur.offpeak                   0.014165 *  
+q07.out.val.offpeak                   0.004209 ** 
+q08.out.ch.peak                       0.009375 ** 
+q09.out.ch.peak                        < 2e-16 ***
+q09.out.val.peak                      0.000828 ***
+q09.out.ch.offpeak                    3.27e-08 ***
+q09.in.ch.tot                         0.000294 ***
+q09.ch.sms                            0.001544 ** 
+```
+
 
 ## Principal Components
 

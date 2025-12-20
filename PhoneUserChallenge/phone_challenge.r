@@ -108,7 +108,7 @@ phone_train$total_call_time_months <- rowSums(phone_train[, months])
 library(dplyr)
 avg_by_sex <- phone_train %>%
   group_by(sex) %>%
-  summarise(
+  summarize(
     n_customers   = n(),
     total_call_time   = sum(total_call_time_months, na.rm = TRUE),
     avg_call_time = total_call_time / n_customers
@@ -121,11 +121,11 @@ library(dplyr)
 # Compute 99th percentile threshold
 threshold <- quantile(phone_train$total_call_time_months, 0.99, na.rm = TRUE)
 
-# Filter out top 1% and summarise
+# Filter out top 1% and summarize
 avg_by_sex <- phone_train %>%
   filter(total_call_time_months <= threshold) %>%  # remove top 1%
   group_by(sex) %>%
-  summarise(
+  summarize(
     n_customers     = n(),
     total_call_time = sum(total_call_time_months, na.rm = TRUE),
     avg_call_time   = total_call_time / n_customers
@@ -137,7 +137,7 @@ library(dplyr)
 
 avg_log_by_sex <- phone_train %>%
   group_by(sex) %>%
-  summarise(
+  summarize(
     n_customers        = n(),
     total_call_time    = sum(total_call_time_months, na.rm = TRUE),
     avg_log_call_time  = mean(log(total_call_time_months + 1), na.rm = TRUE)
@@ -148,27 +148,36 @@ avg_log_by_sex
 
 threshold <- quantile(phone_train$total_call_time_months, 0.99, na.rm = TRUE)
 
-# Filter out top 1% and summarise
-avg_by_sex <- phone_train %>%
+# Filter out top 1% and summarize
+avg_by_age <- phone_train %>%
   filter(total_call_time_months <= threshold) %>%  # remove top 1%
-  group_by(sex) %>%
-  summarise(
+  group_by(age) %>%
+  summarize(
     n_customers     = n(),
     total_call_time = sum(total_call_time_months, na.rm = TRUE),
     avg_call_time   = total_call_time / n_customers
   )
-avg_by_sex
+avg_by_age
+
+ggplot(avg_by_age, aes(x = age, y = avg_call_time)) +
+  geom_col() +
+  labs(
+    x = "Age",
+    y = "Call Time (9-Months Span)",
+    title = "Average Call Time by Age"
+  ) +
+  theme_minimal()
 
 # CALL TIME OVER PLAN
 
 # Compute 99th percentile threshold
 threshold <- quantile(phone_train$total_call_time_months, 0.99, na.rm = TRUE)
 
-# Filter out top 1% and summarise
+# Filter out top 1% and summarize
 avg_by_plan <- phone_train %>%
   filter(total_call_time_months <= threshold) %>%  # remove top 1%
   group_by(tariff.plan) %>%
-  summarise(
+  summarize(
     n_customers     = n(),
     total_call_time = sum(total_call_time_months, na.rm = TRUE),
     avg_call_time   = total_call_time / n_customers
@@ -179,11 +188,11 @@ avg_by_plan
 # Compute 99th percentile threshold
 threshold <- quantile(phone_train$total_call_time_months, 0.99, na.rm = TRUE)
 
-# Filter out top 1% and summarise
+# Filter out top 1% and summarize
 avg_by_pymethod <- phone_train %>%
   filter(total_call_time_months <= threshold) %>%  # remove top 1%
   group_by(payment.method) %>%
-  summarise(
+  summarize(
     n_customers     = n(),
     total_call_time = sum(total_call_time_months, na.rm = TRUE),
     avg_call_time   = total_call_time / n_customers
@@ -194,7 +203,7 @@ avg_by_pymethod
 avg_by_zone <- phone_train %>%
   filter(total_call_time_months <= threshold) %>%  # remove top 1%
   group_by(activation.zone) %>%
-  summarise(
+  summarize(
     n_customers     = n(),
     total_call_time = sum(total_call_time_months, na.rm = TRUE),
     avg_call_time   = total_call_time / n_customers
@@ -206,7 +215,7 @@ avg_by_zone <- phone_train %>%
 avg_by_channel <- phone_train %>%
   filter(total_call_time_months <= threshold) %>%  # remove top 1%
   group_by(activation.channel) %>%
-  summarise(
+  summarize(
     n_customers     = n(),
     total_call_time = sum(total_call_time_months, na.rm = TRUE),
     avg_call_time   = total_call_time / n_customers
@@ -218,7 +227,7 @@ avg_by_channel
 avg_by_addV1 <- phone_train %>%
   filter(total_call_time_months <= threshold) %>%  # remove top 1%
   group_by(vas1) %>%
-  summarise(
+  summarize(
     n_customers     = n(),
     total_call_time = sum(total_call_time_months, na.rm = TRUE),
     avg_call_time   = total_call_time / n_customers
@@ -230,7 +239,7 @@ avg_by_addV1 <- phone_train %>%
 avg_by_addV2 <- phone_train %>%
   filter(total_call_time_months <= threshold) %>%  # remove top 1%
   group_by(vas2) %>%
-  summarise(
+  summarize(
     n_customers     = n(),
     total_call_time = sum(total_call_time_months, na.rm = TRUE),
     avg_call_time   = total_call_time / n_customers
