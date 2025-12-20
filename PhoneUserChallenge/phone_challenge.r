@@ -144,6 +144,20 @@ avg_log_by_sex <- phone_train %>%
   )
 avg_log_by_sex
 
+# CALL TIME OVER AGE
+
+threshold <- quantile(phone_train$total_call_time_months, 0.99, na.rm = TRUE)
+
+# Filter out top 1% and summarise
+avg_by_sex <- phone_train %>%
+  filter(total_call_time_months <= threshold) %>%  # remove top 1%
+  group_by(sex) %>%
+  summarise(
+    n_customers     = n(),
+    total_call_time = sum(total_call_time_months, na.rm = TRUE),
+    avg_call_time   = total_call_time / n_customers
+  )
+avg_by_sex
 
 # CALL TIME OVER PLAN
 

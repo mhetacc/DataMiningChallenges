@@ -25,6 +25,53 @@ Let's first briefly analyze the dataset.
 
 Considering that the target is *monthly call time* we can make the hypothesis that some features do not interest us, specifically: *value added service 1* and *2*, any monthly feature not concerning with call time itself, leaving us with only $time(expensive calls)$ and $time(cheap calls)$, which we could further assume can be summed between each other since overall cost is not a concern. Moreover, there is the possibility that any feature other than time can be discarded. It goes without saying that all of the above should be proved empirically.
 
+
+## Scatterplot
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+
+df_filtered <- phone_train %>% 
+    select(-matches("\\.out\\.ch")) %>%
+    select(-matches("\\.out\\.val")) %>%
+    select(-matches("\\.in")) %>%
+    select(-matches("\\.sms")) %>%
+    select(-matches("\\.cc")) %>%
+    select(-matches("\\y")) 
+
+plot(df_filtered)
+```
+
+I filtered out all monthly data not about call duration.
+ The result is a bit hard to read due to its sheer size.
+
+![](./scatterplot_phone_full.png)
+
+Looking at it more up close we can infer some things. First of all we see that call data looks positively skewed.
+
+![](./scatter_calldata.png)
+
+We can also see that there are some activation channels that see more call time than others, while activation regions seem to differ lightly between one another. 
+X-axis: activation zone (L), activation channel (R)
+Y-axis: call times
+
+![](./scatter_geog+channel_overcalltime.png)
+
+Tariff plan and sex seems to have an impact on call times too.
+X-axis: tariff plan (L), sex (R)
+Y-axis: call times
+
+![](./scatter_plan+sex_over_calltime.png)
+
+Lastly, age does not seem to have that big of an impact on call times, with the exception of the very old.
+X-axis: age
+Y-axis: call times
+
+![](./scatter_age_over_calltime.png)
+
+
 ### Calls Over Everything
 
 Let's try to see if the amount and time of calls are related to other features (for example sex) or not.
@@ -55,7 +102,7 @@ On average, with our data, men's calls seem to last 8% longer. We should ask our
 3 M            3674       215801665        58738.
 ```
 
-Once again, we see that man's calls seems to last roughly5% longer than women's.
+Once again, we see that man's calls seems to last roughly 5% longer than women's.
 Let's try to be more aggressive and cut off the top 10%.
 
 ```{bash}
@@ -283,9 +330,6 @@ Once again we see sign of heteroskedasticity and other non-normal data distribut
 ## Preliminary Observations Conclusions
 
 First and foremost we want to filter out less useful data (for example SMS amount), then we either want to transform it (for example log or Box-Cox) or use some robust regression, like quantile or tree-based approaches.
-
-## Scatterplot?
-
 
 
 # Prediction
