@@ -231,7 +231,7 @@ yhat <- (predict(out, newx=x_test, s = bestlam)>1.5)+1
 
 #### Ridge Plot
 
-![](../RiceChallenge/imgs/ridgeplot.png)
+![](./imgs/ridgeplot.png)
 
 We can see an effective shrinkage of most coefficients towards zero, with the exception of Eccentricity, which we already recognized as not very impactful on the overall variance and prediction.
 
@@ -264,7 +264,7 @@ pcr.fit <- pcr(Class ~ ., data = rice_train, subset = train, scale = TRUE, valid
 validationplot(pcr.fit, val.type = "MSEP")
 ```
 
-![](../RiceChallenge/imgs/validationplot_pcr.png)
+![](./imgs/validationplot_pcr.png)
 
 Now we find that the lowest cross-validation error occurs when $M=7$ components are used, but it is almost identical with $M=2$ components.
 

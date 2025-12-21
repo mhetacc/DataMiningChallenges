@@ -47,29 +47,29 @@ plot(df_filtered)
 I filtered out all monthly data not about call duration.
  The result is a bit hard to read due to its sheer size.
 
-![](./scatterplot_phone_full.png)
+![](./imgs/scatterplot_phone_full.png)
 
 Looking at it more up close we can infer some things. First of all we see that call data looks positively skewed.
 
-![](./scatter_calldata.png)
+![](./imgs/scatter_calldata.png)
 
 We can also see that there are some activation channels that see more call time than others, while activation regions seem to differ lightly between one another. 
 X-axis: activation zone (L), activation channel (R)
 Y-axis: call times
 
-![](./scatter_geog+channel_overcalltime.png)
+![](./imgs/scatter_geog+channel_overcalltime.png)
 
 Tariff plan and sex seems to have an impact on call times too.
 X-axis: tariff plan (L), sex (R)
 Y-axis: call times
 
-![](./scatter_plan+sex_over_calltime.png)
+![](./imgs/scatter_plan+sex_over_calltime.png)
 
 Lastly, age does not seem to have that big of an impact on call times, with the exception of the very old.
 X-axis: age
 Y-axis: call times
 
-![](./scatter_age_over_calltime.png)
+![](./imgs/scatter_age_over_calltime.png)
 
 
 ### Calls Over Everything
@@ -77,8 +77,8 @@ Y-axis: call times
 Let's try to see if the amount and time of calls are related to other features (for example sex) or not.
 First we want to see the total calls taken and the total call time over nine months. All the test are done on the training set to prevent data leakage.
 
-![](./monthly_calls.png)
-|[](./monthly_calltime.png)
+![](./imgs/monthly_calls.png)
+|[](./imgs/monthly_calltime.png)
 
 It is very interesting to see that the two graphs, while differing greatly in Y-values magnitude, are almost identical from a trend standpoint, hinting at a strong correlation between number of calls and time spent calling. If proven (for example with a correlation matrix), and considering our target, the amount of calls per month can probably be dropped.
 
@@ -192,12 +192,12 @@ Activation zone and channel seem to have some influence on call times, with the 
 Call time data is usually positively skewed, with many users having low usage and a small number of user with very high usage (e.g.,50.000 seconds).
 This is easily verifiable at a glance if we try to plot the monthly call time or, better yet, with an histogram.
 
-![](phone_y_plot.png)
-![](phone_y_hist.png)
+![](./imgs/phone_y_plot.png)
+![](./imgs/phone_y_hist.png)
 
 A common method to compress such data is by applying a logarithmic function to it.
 
-![](phone_log_y_hist.png)
+![](./imgs/phone_log_y_hist.png)
 
 Let's now check wether other data exhibit similar characteristics by calculating the skewness with the *e1071* package.
 
@@ -265,7 +265,7 @@ One of the ways to handle collinearity is to either drop or merge the afflicted 
 
 A good preliminary analysis can be done by plotting a linear regression fit.
 
-![](./4plots_ln.png)
+![](./imgs/4plots_ln.png)
 
 What we can infer from the plots above is that our data presents high heteroskedasticity, skewness and in general that our data is not normally distributed. There are also potential outliers and influential points that could distort the model 8(for example point 9853).
 
@@ -318,7 +318,7 @@ We can see that, for the most part, relevant features are the one related to mon
 
 Log transforming the target yield better results, with a general normalization of the values, but we still see the same problems.
 
-![](./4plots_ln_log.png)
+![](./imgs/4plots_ln_log.png)
 
 Here follows the features that contribute more to the prediction. It is interesting to see that this time around categorical values hold more weight.
 
@@ -357,7 +357,7 @@ q09.ch.sms                            0.001544 **
 
 Data as-is can be transformed into 101 principal components, and the cumulative proportion with only two is approximately 0.45. To get to 99% of explained variance we need 69 components.
 
-![](./PCAphone.png)
+![](./imgs/PCAphone.png)
 
 Once again we see sign of heteroskedasticity and other non-normal data distribution.
 
