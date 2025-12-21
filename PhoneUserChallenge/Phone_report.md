@@ -316,11 +316,11 @@ q09.ch.cc                              -2.097 0.036019 *
 
 We can see that, for the most part, relevant features are the one related to monthly calls. It is interesting to notice that the second month does not seem to hold much weight, even thought it presents a similar amount of call data compared to the first.
 
-Log transforming the target yield better results, with a general normalization of the values. 
+Log transforming the target yield better results, with a general normalization of the values, but we still see the same problems.
 
 ![](./4plots_ln_log.png)
 
-Here follows the features that [TODO]
+Here follows the features that contribute more to the prediction. It is interesting to see that this time around categorical values hold more weight.
 
 ```{bash}
                                       Pr(>|t|)    
@@ -359,7 +359,7 @@ Data as-is can be transformed into 101 principal components, and the cumulative 
 
 ![](./PCAphone.png)
 
-Once again we see sign of heteroskedasticity and other non-normal data distribution problematics.
+Once again we see sign of heteroskedasticity and other non-normal data distribution.
 
 ## Preliminary Observations Conclusions
 

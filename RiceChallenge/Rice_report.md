@@ -14,7 +14,7 @@ merged = df1.merge(df2, on=keys, how="inner")
 
 ## ScatterPlot
 
-![](../RiceChallenge/ricetest_scatterplot_1080.png)
+![](./imgs/scatterplot_rice_loess.png)
 
 From the *scatterplot* we can infer that there are four features (Area, Perimeter, Convex_Area and Major_Axis_Length) that seems to share similar characteristics to the point of being almost linear between each other. For example, given the Area, a linear regression would predict with great precision both Perimeter and Convex_Area.
 
@@ -23,18 +23,18 @@ From the *scatterplot* we can infer that there are four features (Area, Perimete
 We can use a correlation matrix to see exactly how related to each other the features are.
 
 ```{r}
-cor(test)
+cor(rice_train)
 ```
 
 ```{bash}
                          Area  Perimeter Major_Axis_Length Minor_Axis_Length Eccentricity Convex_Area      Extent
-Area               1.00000000  0.9648441         0.9015284         0.7810733    0.3675062   0.9989030 -0.06433114
-Perimeter          0.96484406  1.0000000         0.9725828         0.6156633    0.5630967   0.9684781 -0.14121985
-Major_Axis_Length  0.90152836  0.9725828         1.0000000         0.4390172    0.7236148   0.9019506 -0.15033884
-Minor_Axis_Length  0.78107334  0.6156633         0.4390172         1.0000000   -0.2855540   0.7804015  0.06755560
-Eccentricity       0.36750616  0.5630967         0.7236148        -0.2855540    1.0000000   0.3683452 -0.21374012
-Convex_Area        0.99890295  0.9684781         0.9019506         0.7804015    0.3683452   1.0000000 -0.07090790
-Extent            -0.06433114 -0.1412199        -0.1503388         0.0675556   -0.2137401  -0.0709079  1.00000000
+Area               1.00000000  0.9670401         0.9035632        0.79022701    0.3465318  0.99895272 -0.06002223
+Perimeter          0.96704011  1.0000000         0.9716318        0.63486482    0.5378465  0.97046788 -0.12718015
+Major_Axis_Length  0.90356325  0.9716318         1.0000000        0.45675159    0.7062566  0.90390912 -0.13562592
+Minor_Axis_Length  0.79022701  0.6348648         0.4567516        1.00000000   -0.2939393  0.78975480  0.06192558
+Eccentricity       0.34653177  0.5378465         0.7062566       -0.29393931    1.0000000  0.34707340 -0.19301157
+Convex_Area        0.99895272  0.9704679         0.9039091        0.78975480    0.3470734  1.00000000 -0.06397213
+Extent            -0.06002223 -0.1271802        -0.1356259        0.06192558   -0.1930116 -0.06397213  1.00000000
 ```
 
 As suspected, all four features mentioned above have a degree of correlation that exceeds ninety percent. This would mean that, especially for linear models, we would like to combine or remove them, since they can negatively impact regression performances.
@@ -46,7 +46,7 @@ If we only had the above mentioned four features, then a linear regression would
 ### Linear Regression Coefficients
 
 ```{r}
-fit = lm(Class ~ ., data=train)
+fit = lm(Class ~ ., data=rice_train)
 
 summary(fit)
 ```
@@ -96,28 +96,22 @@ Once again, we can see that Extent and Eccentricity contribute very little to th
 A good way to aggregate and simplify data is by decomposing it into its principal components (centered in zero and scaled to have unit variance).
 
 ```{r}
-pc <- prcomp(test, scale. = TRUE)
+pc <- prcomp(rice_train, scale. = TRUE)
 ```
 
 ```{bash}
 Importance of components:
-                          PC1    PC2    PC3     PC4     PC5     PC6     PC7
-Standard deviation     2.1403 1.2281 0.9428 0.11449 0.08022 0.04463 0.02086
-Proportion of Variance 0.6544 0.2155 0.1270 0.00187 0.00092 0.00028 0.00006
-Cumulative Proportion  0.6544 0.8699 0.9969 0.99873 0.99965 0.99994 1.00000
+                          PC1    PC2    PC3     PC4     PC5     PC6     PC7     PC8
+Standard deviation     2.2924 1.2436 0.9562 0.51393 0.10621 0.07758 0.04519 0.02052
+Proportion of Variance 0.6569 0.1933 0.1143 0.03302 0.00141 0.00075 0.00026 0.00005
+Cumulative Proportion  0.6569 0.8502 0.9645 0.99753 0.99894 0.99969 0.99995 1.00000
 ```
 
-We can see that more than ninenty nine percent of overall variance can be explained with just three components, which means that not only we i could make good prediction with lower degree data, but also that a 2D visualization of data that uses only two components should give us a good idea of the whole dataset.
+We can see that more than ninety nine percent of overall variance can be explained with just three components, which means that not only we i could make good prediction with lower degree data, but also that a 2D visualization of data that uses only two components should give us a good idea of the whole dataset.
 
-![](../RiceChallenge/pca_rice_1080.png)
+![](./imgs/pca_plot_rice.png)
 
-The above graph suggests that the two types of rice are well separated between each other, with similar classes clustering nicely which should lead to low error rates. Of course, we coloured predicted values, not true labels.
-
-### On Cheated Train Dataset
-
-Just out of curiosity, let us see the above graph computed on true labels (i.e., on the merged test dataset mentioned in section Dataset).
-
-![](../RiceChallenge/pca_true_rice_classes_1080.png) Here we can see that this graph is quite similar from the previous one, except for the fact that data points are a bit more spread out. We can conclude that our preliminary assumptions were correct.
+The above graph suggests that the two types of rice are well separated between each other, with similar classes clustering nicely which should lead to low error rates. 
 
 # Prediction
 
@@ -237,7 +231,7 @@ yhat <- (predict(out, newx=x_test, s = bestlam)>1.5)+1
 
 #### Ridge Plot
 
-![](../RiceChallenge/ridgeplot.png)
+![](../RiceChallenge/imgs/ridgeplot.png)
 
 We can see an effective shrinkage of most coefficients towards zero, with the exception of Eccentricity, which we already recognized as not very impactful on the overall variance and prediction.
 
@@ -257,7 +251,7 @@ We can see a slight improvement over ridge and linear regression.
 
 #### Lasso Plot
 
-![](../RiceChallenge/lassoplot.png)
+![](../RiceChallenge/imgs/lassoplot.png)
 
 Once again Eccentricity seems to resist shrinkage, but overall we can see a greater degree of coefficient reduction compared to ridge regression (as it should). 
 
@@ -270,7 +264,7 @@ pcr.fit <- pcr(Class ~ ., data = rice_train, subset = train, scale = TRUE, valid
 validationplot(pcr.fit, val.type = "MSEP")
 ```
 
-![](../RiceChallenge/validationplot_pcr.png)
+![](../RiceChallenge/imgs/validationplot_pcr.png)
 
 Now we find that the lowest cross-validation error occurs when $M=7$ components are used, but it is almost identical with $M=2$ components.
 
@@ -299,7 +293,7 @@ yhat <- (predict(pcr.fit, newdata=rice_test, ncomp = 6)>1.5)+1
 
 ### Partial Least Squares
 
-![](../RiceChallenge/validationplot_pls.png)
+![](../RiceChallenge/imgs/validationplot_pls.png)
 
 Now it would seem that the lowest cross-validation error with just $M=2$ components.
 
@@ -405,7 +399,7 @@ RMSE was used to select the optimal model using the smallest value.
 The final value used for the model was k = 19.
 ```
 
-![](../RiceChallenge/knn_regression.png)
+![](../RiceChallenge/imgs/knn_regression.png)
 
 We can see that the error drops considerably between one and five neighbors, and keeps decreasing until $k = 19$. The $R^2$ is also quite good, since the model explain more than seventy percent of the variance in target variable.
 
@@ -461,7 +455,7 @@ Accuracy was used to select the optimal model using the largest value.
 The final value used for the model was k = 20.
 ```
 
-![](../RiceChallenge/knn_classification.png)
+![](../RiceChallenge/imgs/knn_classification.png)
 
 The model is most accurate with $k = 20$, similarly to $k = 19$ that we got from KNN-Regression. Now we can predict *yhat* directly without manipulation since this model has been trained as classification from the start.
 
@@ -529,7 +523,7 @@ RMSE was used to select the optimal model using the smallest value.
 The final values used for the model were mtry = 2, splitrule = extratrees and min.node.size = 5.
 ```
 
-![](../RiceChallenge/randomforest.png)
+![](../RiceChallenge/imgs/randomforest.png)
 
 In the optimal configuration yield the following results:
 - $MSE = 0.0589397$
