@@ -368,8 +368,40 @@ First and foremost we want to filter out less useful data (for example SMS amoun
 
 # Prediction
 
-## Linear Regression
+## Lasso Regression
 
+I will use lasso regression as a preliminary diagnostic tool to check which features to drop or transform.
+Let's first make a baseline prediction without transforming any value. The resulting fit's mean square error is $MSE = 19528048$. Not great, but expected since we saw in the preliminary observations many signs of non-linearity.
+
+I then tried log-transforming the target value.
+
+```{r}
+linear_fit_log = lm(log(y+1) ~ ., data=phone_train, subset = train)
+pred <- exp(predict(linear_fit_log, newdata = phone_train[test, ]))-1
+```
+
+With this model we get $MSE = 5.37932e+17$, which is even worse than before. Then i filtered out incoming calls, SMS and calls to the call center.
+
+
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+
+x_filtered <- x %>% 
+    select(-matches("\\.out\\.ch")) %>%
+    select(-matches("\\.out\\.val")) %>%
+    select(-matches("\\.in")) %>%
+    select(-matches("\\.sms")) %>%
+    select(-matches("\\.cc")) %>%
+    select(-matches("\\y")) 
+
+# Assuming x is a matrix with column names
+cols_to_keep <- grep("\\.out\\.ch|\\.out\\.val|\\.in|\\.sms|\\.cc|y", colnames(x), invert = TRUE)
+x_filtered <- x[, cols_to_keep]
+
+```
 
 ## KNN
 
@@ -402,3 +434,7 @@ It is quite evident that $MSE = 16368440.9988$ is a terrible result. I then trie
 ```{r}
 yhat <- exp(predict(knn_fit, newdata=phone_test)-1)
 ```
+
+## PCR
+
+## Random Forest

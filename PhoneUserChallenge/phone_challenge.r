@@ -264,8 +264,18 @@ linearfit <- function(){
   pred <- predict(linear_fit, newdata = phone_train[test, ])
   mean((pred - y.test)^2)
 
+  linear_fit_log = lm(log(y+1) ~ ., data=phone_train, subset = train)
+
+  pred <- exp(predict(linear_fit_log, newdata = phone_train[test, ]))-1
+  mean((pred - y.test)^2)
+
+
+  linear_fit_loglog = lm(y ~ ., data=phone_train, subset = train)
+  
+
+
   # vector with prediction for each row in test dataframe
-  yhat = (predict(fit, newdata=phone_test)>1.5)+1
+  yhat = exp(predict(linear_fit, newdata=phone_test))
 
   #### Collinearity ####
   phone_train$Combined <- rowMeans(phone_train[, c("Area","Perimeter","Major_Axis_Length","Convex_Area")])
@@ -340,7 +350,7 @@ ridgeregression <- function(){
   )
 
   # lastly predict yhat on test set 
-  x_test <- model.matrix(~ ., data=phone_test)[, -1]  
+  x_test <- model.matrix(~ ., data=phone_test)  
   yhat <- (predict(ridge_fit, newx=x_test, s = bestlam)>1.5)+1
 }
 
@@ -382,7 +392,7 @@ lassoregression <- function(){
   )
 
   # lastly predict yhat on test set 
-  x_test <- model.matrix(~ ., data=phone_test)[, -1]  
+  x_test <- model.matrix(~ ., data=phone_test)  
   yhat <- (predict(lasso_fit, newx=x_test, s = bestlam)>1.5)+1
 }
 
