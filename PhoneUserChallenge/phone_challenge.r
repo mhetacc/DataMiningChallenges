@@ -367,20 +367,68 @@ lassoregression <- function(){
 
   # built-in cross-validation function for lasso lambda selection
   set.seed(1)
-  cv.out <- cv.glmnet(x[train, ], y[train], alpha = 1)
-  plot(cv.out)
-  bestlam <- cv.out$lambda.min
-  cv_mse <- min(cv.out$cvm)
-  cv_rmse <- sqrt(cv_mse)
-  cv_rmse
+  library(glmnet)
+  lasso_fit <- cv.glmnet(x[train, ], y[train], alpha = 1)
+  plot(lasso_fit)
+  bestlam <- lasso_fit$lambda.min
+  lasso_fit_mse <- min(lasso_fit$cvm)
+  lasso_fit_mse
+  lasso_fit_rmse <- sqrt(lasso_fit_mse)
+  lasso_fit_rmse
 
-  ## same as of cv.out
-  # lasso.pred <- predict(lasso.mod, s = bestlam, newx = x[test, ])
-  # mean((lasso.pred - y.test)^2)
+  # LOG TRANSFORM TARGET
+
+  set.seed(1)
+  library(glmnet)
+  lasso_log_fit <- cv.glmnet(x[train, ], log(y[train]+1), alpha = 1)
+  plot(lasso_log_fit)
+  bestlam <- lasso_log_fit$lambda.min
+  lasso_log_fit_mse <- min(lasso_log_fit$cvm)
+  lasso_log_fit_mse
+  lasso_log_fit_rmse <- sqrt(lasso_log_fit_mse)
+  lasso_log_fit_rmse
+
+  # NO TRANSFORM, FILTER OUT DATA
+
+  #x_filtered <- x[, !colnames(x) %in% c("col1", "col2"), drop = FALSE]
+
+  x_filtered <- x[, !grepl("\\.ch|\\.val|\\.in|\\.sms|\\.cc$", colnames(x)), drop = FALSE]
+
+  # best results
+  x_filtered <- x[, !grepl("\\.in|\\.sms|\\.cc$", colnames(x)), drop = FALSE]
+
+  x_filtered <- x[, !grepl("\\.in|\\.sms$", colnames(x)), drop = FALSE]
+
+    # best results
+  x_filtered <- x[, !grepl("\\plan|age|^activation|^sex|^payment|\\.in|\\.sms|\\.cc$", colnames(x)), drop = FALSE]
+
+  set.seed(1)
+  library(glmnet)
+  lasso_fit <- cv.glmnet(x_filtered[train, ], y[train], alpha = 1)
+  plot(lasso_fit)
+  bestlam <- lasso_fit$lambda.min
+  lasso_fit_mse <- min(lasso_fit$cvm)
+  lasso_fit_mse
+  lasso_fit_rmse <- sqrt(lasso_fit_mse)
+  lasso_fit_rmse
+
+    # LOG TRANSFORM, FILTER OUT DATA
+
+    set.seed(1)
+  library(glmnet)
+  lasso_log_fit <- cv.glmnet(x_filtered[train, ], log(y[train]+1), alpha = 1)
+  plot(lasso_log_fit)
+  bestlam <- lasso_log_fit$lambda.min
+  lasso_log_fit_mse <- min(lasso_log_fit$cvm)
+  lasso_log_fit_mse
+  lasso_log_fit_rmse <- sqrt(lasso_log_fit_mse)
+  lasso_log_fit_rmse
 
 
-  # fit ridge model with best lambda
-  lasso_fit <- glmnet(x, y, alpha = 1)
+
+  # FINALIZE MODEL WITH BEST LAMBDA
+  # first fit with all training set
+  lasso_fit <- glmnet(x, y, alpha = 1, lambda = bestlam)
   
   plot(lasso_fit, xvar = "lambda")
   legend(
@@ -391,7 +439,7 @@ lassoregression <- function(){
     cex = 0.8
   )
 
-  # lastly predict yhat on test set 
+  # then predict yhat on test set 
   x_test <- model.matrix(~ ., data=phone_test)  
   yhat <- (predict(lasso_fit, newx=x_test, s = bestlam)>1.5)+1
 }

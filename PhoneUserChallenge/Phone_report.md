@@ -370,38 +370,39 @@ First and foremost we want to filter out less useful data (for example SMS amoun
 
 ## Lasso Regression
 
-I will use lasso regression as a preliminary diagnostic tool to check which features to drop or transform.
-Let's first make a baseline prediction without transforming any value. The resulting fit's mean square error is $MSE = 19528048$. Not great, but expected since we saw in the preliminary observations many signs of non-linearity.
+I will use lasso regression with Cross-Validation as a preliminary diagnostic tool for checking which features to drop or transform.
+Let's first make a baseline prediction without transforming any value. The resulting fit's mean square error is $MSE = 18091358$. Not great, but expected since we saw in the preliminary observations many signs of non-linearity.
 
-I then tried log-transforming the target value.
-
-```{r}
-linear_fit_log = lm(log(y+1) ~ ., data=phone_train, subset = train)
-pred <- exp(predict(linear_fit_log, newdata = phone_train[test, ]))-1
-```
-
-With this model we get $MSE = 5.37932e+17$, which is even worse than before. Then i filtered out incoming calls, SMS and calls to the call center.
-
-
+I then tried log-transforming the target value (with all features).
 
 ```{r}
-library(dplyr)
-library(ggplot2)
-library(tidyr)
-
-x_filtered <- x %>% 
-    select(-matches("\\.out\\.ch")) %>%
-    select(-matches("\\.out\\.val")) %>%
-    select(-matches("\\.in")) %>%
-    select(-matches("\\.sms")) %>%
-    select(-matches("\\.cc")) %>%
-    select(-matches("\\y")) 
-
-# Assuming x is a matrix with column names
-cols_to_keep <- grep("\\.out\\.ch|\\.out\\.val|\\.in|\\.sms|\\.cc|y", colnames(x), invert = TRUE)
-x_filtered <- x[, cols_to_keep]
-
+library(glmnet)
+lasso_log_fit <- cv.glmnet(x[train, ], log(y[train]+1), alpha = 1)
+lasso_log_fit_mse <- min(lasso_log_fit$cvm)
 ```
+
+With this model we get $MSE = 6.200236$, which is way better than before, showing strong evidence that log-transforming the data is a good idea. 
+
+Then, I filtered out incoming calls, SMS and calls to the call center, and fitted the model without log-transforming. We get $MSE = 18040253$, a 3% improvement over the model with all predictors. Keeping the calls to the call center, on the other hand, gives us a slightly worse $MSE = 18080968$.
+
+```{r}
+x_filtered <- x[, !grepl("\\.in|\\.sms|\\.cc$", colnames(x)), drop = FALSE]
+```
+
+I then removed all monthly values except for outgoing call times. The mean square error is $MSE = 18207357$, so 6% worse than the model with all values. 
+
+Just for curiosity, I tried to remove non call related features:
+- No payment information: $MSE = 18035221$
+- No payment, no sex information: $MSE = 18036839$
+- No payment, sex, activation zone and channel information: $MSE = 18034269$
+- No payment, sex, activation zone, channel and age information: $MSE = 18034610$
+- No payment, sex, activation zone, channel, age and plan information: $MSE = 18975290$
+
+Plan is very important in prediction precision.
+
+At this point I tried to do the filtering wit log-transforming the target value. The results follow:
+- log-transform target, filter out incoming calls, SMS and calls to the call center: $$ 
+
 
 ## KNN
 
