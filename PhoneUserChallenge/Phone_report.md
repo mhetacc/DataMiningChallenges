@@ -371,7 +371,7 @@ First and foremost we want to filter out less useful data (for example SMS amoun
 ## Lasso Regression
 
 I will use lasso regression with Cross-Validation as a preliminary diagnostic tool for checking which features to drop or transform.
-Let's first make a baseline prediction without transforming any value. The resulting fit's mean square error is $MSE = 18091358$. Not great, but expected since we saw in the preliminary observations many signs of non-linearity.
+Let's first make a baseline prediction without transforming any value. The resulting fit mean square error is $MSE = 18091358$. Not great, but expected since we saw in the preliminary observations many signs of non-linearity.
 
 I then tried log-transforming the target value (with all features).
 
@@ -389,16 +389,30 @@ Then, I filtered out incoming calls, SMS and calls to the call center, and fitte
 x_filtered <- x[, !grepl("\\.in|\\.sms|\\.cc$", colnames(x)), drop = FALSE]
 ```
 
-I then removed all monthly values except for outgoing call times. The mean square error is $MSE = 18207357$, so 6% worse than the model with all values. 
+I then removed all monthly values except for outgoing call times. The mean square error is $MSE = 18207357$, so 6% worse than the model with all values, so the model performs better if we keep amount of calls and value of calls [TODO] VALUE OF CALLS TOO????
 
-Just for curiosity, I tried to remove non call related features:
-- No payment information: $MSE = 18035221$
-- No payment, no sex information: $MSE = 18036839$
+Just for curiosity, I tried to remove non call related features (all of the following are with incoming calls, SMS and calls to call center filtered out):
+- Baseline with only incoming calls, SMS and calls to call-center filtered out: $MSE = 18040253$
+- No payment information: $MSE = 18035221$ 
+- No payment, no sex information: $MSE = 18036839$ 
 - No payment, sex, activation zone and channel information: $MSE = 18034269$
 - No payment, sex, activation zone, channel and age information: $MSE = 18034610$
 - No payment, sex, activation zone, channel, age and plan information: $MSE = 18975290$
+- No payment, sex, activation zone, channel, age, plan information and presence of first or second added-value services : $MSE = 18969265$
+- No payment, value-added services, activation channel and zone: $MSE = 18021270$ 
+- No payment, No value-added services and activation zone: $MSE = 18022544$ 
+- No payment, No value-added services and activation channel: $MSE = 18024845$ 
+- No payment, value-added service one, activation zone and channel: $MSE = 18035228$
+- No payment, value-added service two, activation zone and channel: $MSE = 18019454$ **(BEST)**
 
-Plan is very important in prediction precision.
+We can infer the following: call plan is very important in prediction precision. Sex, and age also seem to improve prediction precision.
+On the other hand, dropping activation zone and channel seem to improve the model. Removing added-value service one yield worse performance, while removing the second one gives us an improvement. 
+
+Overall, it would seem that the best model is with payment, second value-added service, activation channel, activation zone, incoming calls, SMS and calls to call center filtered out.
+
+At this point I wanted to see whether some pre-processing on the monthly features could improve the prediction:
+- Peak and offpeak values added together: $MSE = $
+- Peak and offpeak values added together, prediction done on the average call time over nine months: $MSE = $ 
 
 At this point I tried to do the filtering wit log-transforming the target value. The results follow:
 - log-transform target, filter out incoming calls, SMS and calls to the call center: $$ 

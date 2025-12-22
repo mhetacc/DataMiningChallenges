@@ -63,8 +63,8 @@ ggplot(df_plot, aes(x = month, y = total_calls)) +
 
 ########## CALL TIME ############
 
+# add *offpeak+*peak for each month and feature
 months <- paste0("q0", 1:9)
-
 for (m in months) {
   peak_col    <- paste0(m, ".out.dur.peak")
   offpeak_col <- paste0(m, ".out.dur.offpeak")
@@ -400,7 +400,35 @@ lassoregression <- function(){
   x_filtered <- x[, !grepl("\\.in|\\.sms$", colnames(x)), drop = FALSE]
 
     # best results
-  x_filtered <- x[, !grepl("\\plan|age|^activation|^sex|^payment|\\.in|\\.sms|\\.cc$", colnames(x)), drop = FALSE]
+  x_filtered <- x[, !grepl("vas2|^payment|^activation|\\.in|\\.sms|\\.cc$", colnames(x)), drop = FALSE]
+
+  # merge offpeak and on peak of all
+months <- paste0("q0", 1:9)
+
+for (m in months) {
+  ch_peak_col    <- paste0(m, ".out.ch.peak")
+  ch_offpeak_col <- paste0(m, ".out.ch.offpeak")
+  ch_total_col   <- paste0(m, ".out.ch.tot")    
+  
+  dur_peak_col    <- paste0(m, ".out.dur.peak")
+  dur_offpeak_col <- paste0(m, ".out.dur.offpeak")
+  dur_total_col   <- paste0(m, ".out.dur.tot")    
+
+  val_peak_col    <- paste0(m, ".out.val.peak")
+  val_offpeak_col <- paste0(m, ".out.val.offpeak")
+  val_total_col   <- paste0(m, ".out.val.tot")    
+
+  phone_train[[total_col]] <- rowSums(phone_train[, c(ch_peak_col, ch_offpeak_col)], na.rm = TRUE)
+
+  phone_train[[total_col]] <- rowSums(phone_train[, c(dur_peak_col, dur_offpeak_col)], na.rm = TRUE)
+
+  phone_train[[total_col]] <- rowSums(phone_train[, c(val_peak_col, val_offpeak_col)], na.rm = TRUE)
+}
+
+  x_filtered <- x[, !grepl("vas2|^payment|^activation|\\.in|\\.sms|\\.cc$", colnames(x)), drop = FALSE]
+
+
+}
 
   set.seed(1)
   library(glmnet)
