@@ -1,0 +1,19 @@
+\section{Reflection}
+
+Let's now discuss problems, potential future expansions and learning outcomes of this project.
+
+\subsection{Self-Assessment}
+
+Using \textit{XML-RPC} and \textit{threading} libraries proved to be sub-optimal: the former has a very contrived syntax and makes writing procedure calls a bit unintuitive, since forces the programmer to think in the "opposite direction". When writing a remote procedure call (i.e., those functions that get registered by \textit{register\_function()}) is important to keep in mind that they are going to be used by the caller and not by sender (in whom code block they are written in).
+
+Code could be less coupled: both server and game loop reside in the same file, and a lot of components are either internal classes or nested functions. Moreover, both command and order queues are global variables, which is generally a practice to be avoided.  
+
+On the other hand, code is well documented and as understandable as possible, even though following the flow of, for example, an input propagation requires jumping through it many times.
+
+\subsection{Future Works}
+
+Apart from the two features already discussed (leader election and log compaction), future expansions could implement cluster's membership change and a Byzantine fault-tolerant version of Raft. Adding new game functionalities, thus command types, should be easy since they can be propagated by the existing infrastructure, and the same is true for adding new players: provided that a new, bigger, user interface gets created, changing cluster's size should, in our testing, work without any issues.  
+
+\subsection{Learning Outcomes}
+
+We started this project by having very limited Python competencies, having never written concurrent programming, never touched a game engine and never worked with network transmission protocols. All in all, we learned all of the above, in some cases going so far as trying different alternative solutions (we implemented Raft nodes mockups with threading, multiprocessing and asyncio libraries), making this project an invaluable learning experience. 

@@ -363,7 +363,7 @@ Once again we see sign of heteroskedasticity and other non-normal data distribut
 
 ## Preliminary Observations Conclusions
 
-First and foremost we want to filter out less useful data (for example SMS amount), then we either want to transform it (for example log or Box-Cox) or use some robust regression, like quantile or tree-based approaches.
+First and foremost we want to filter out less useful data (for example SMS amount), then we either want to transform it (for example log or Box-Cox) and/or use some robust regression, like quantile or tree-based approaches.
 
 
 # Prediction
