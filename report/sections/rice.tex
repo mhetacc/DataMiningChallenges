@@ -4,7 +4,7 @@
 
 \subsubsection{Dataset}
 
-All following considerations are made using the datasets provided on the challenge page (\textit{rice\_test.csv} and \textit{rice\_train.csv}), but it is worth noting that they both stem from an original one that can be found at the \href{https://www.muratkoklu.com/datasets/}{dataset source page}. I used it to compute an alternative version of the *test* dataset that contains the true attribute for \textit{Class}.
+All following considerations are made using the datasets provided on the challenge page (\textit{rice\_test.csv} and \textit{rice\_train.csv}), but it is worth noting that they both stem from an original one that can be found at the \href{https://www.muratkoklu.com/datasets/}{dataset source page}. I used it to compute an alternative version of the test dataset that contains the true attribute for \textit{Class} (listing \ref{code:mergedatasets}).
 
 \begin{lstlisting}[language={Python},label={code:mergedatasets}, caption={Merge datasets}]
 df1 = pd.read_csv("rice_test.csv").round(10)
@@ -16,6 +16,8 @@ merged = df1.merge(df2, on=keys, how="inner")
 
 \subsubsection{Scatter Plot}
 
+From the \textit{scatter plot} (figure \ref{fig:scatterplot_rice_loess}) we can infer that there are four features (\textit{Area}, \textit{Perimeter}, \textit{Convex\_Area} and \textit{Major\_Axis\_Length}) that seem to be extremely correlated
+
 \begin{figure}[h]
   \centering
   \includegraphics[width=\linewidth]{imgs/scatterplot_rice_loess.png}
@@ -24,36 +26,33 @@ merged = df1.merge(df2, on=keys, how="inner")
   \label{fig:scatterplot_rice_loess}
 \end{figure}
 
-From the \textit{scatter plot} we can infer that there are four features (\textit{Area}, \textit{Perimeter}, \textit{Convex\_Area} and \textit{Major\_Axis\_Length}) that seem to be extremely correlated
-
 \subsubsection{Correlation Matrix}
 
-We can use a correlation matrix to see exactly how related to each other the features are. The results are as follow.
+We can use a correlation matrix (table \ref{tab:correlation_matrix_rice}) to see exactly how related to each other the features are. As suspected, all four features before-mentioned have a high degree of correlation (over ninety percent). Once way to handle this is to either use models robust against collinearity, or to either combine or remove some of the correlated features.  
 
 \begin{table}
+  \small
   \centering
   \caption{Correlation matrix of features}
-  \label{tab:morphology_correlation}
+  \label{tab:correlation_matrix_rice}
   \begin{tabularx}{\textwidth}{lXXXXXXX}
-    \toprule
-    Area & Perimeter & Major\_Axis\_Length & Minor\_Axis\_Length & Eccentricity & Convex\_Area & Extent \\
+    \toprule 
+     & Area & Perimeter & Major Axis Length & Minor Axis Length & Eccentricity & Convex Area & Extent \\
     \midrule
     Area              &  1.00000000 &  0.96704011 &  0.90356325 &  0.79022701 &  0.34653177 &  0.99895272 & -0.06002223 \\
     Perimeter         &  0.96704011 &  1.00000000 &  0.97163180 &  0.63486482 &  0.53784650 &  0.97046788 & -0.12718015 \\
-    Major\_Axis\_Length &  0.90356325 &  0.97163180 &  1.00000000 &  0.45675159 &  0.70625660 &  0.90390912 & -0.13562592 \\
-    Minor\_Axis\_Length &  0.79022701 &  0.63486482 &  0.45675159 &  1.00000000 & -0.29393931 &  0.78975480 &  0.06192558 \\
+    Major Axis Length &  0.90356325 &  0.97163180 &  1.00000000 &  0.45675159 &  0.70625660 &  0.90390912 & -0.13562592 \\
+    Minor Axis Length &  0.79022701 &  0.63486482 &  0.45675159 &  1.00000000 & -0.29393931 &  0.78975480 &  0.06192558 \\
     Eccentricity      &  0.34653177 &  0.53784650 &  0.70625660 & -0.29393931 &  1.00000000 &  0.34707340 & -0.19301157 \\
-    Convex\_Area       &  0.99895272 &  0.97046788 &  0.90390912 &  0.78975480 &  0.34707340 &  1.00000000 & -0.06397213 \\
+    Convex Area       &  0.99895272 &  0.97046788 &  0.90390912 &  0.78975480 &  0.34707340 &  1.00000000 & -0.06397213 \\
     Extent            & -0.06002223 & -0.12718015 & -0.13562592 &  0.06192558 & -0.19301157 & -0.06397213 &  1.00000000 \\
     \bottomrule
   \end{tabularx}
 \end{table}
 
-As suspected, all four features mentioned above have a high degree of correlation (over ninety percent). Once way to handle this is to either use models robust against collinearity, or to either combine or remove some of the correlated features.  
-
 \subsubsection{Features' Importance}
 
-To get a better idea on the importance of each feature, I trained a simple linear regression model, and looked at the result with \verb|summary(fit)|. The results follows.
+To get a better idea on the importance of each feature, I trained a simple linear regression model, and looked at the result with \verb|summary(fit)|, which can be seen in table \ref{tab:regression_coefficients}. The significance stars tells us visually that, with the exception of \textit{Minor\_Axis\_Length}, the features that are highly correlated to each other contributes strongly to the model, while the \textit{Eccentricity} and \textit{Extent} contribute very little.
 
 \begin{table}
   \centering
@@ -75,15 +74,13 @@ To get a better idea on the importance of each feature, I trained a simple linea
   \end{tabularx}
 \end{table}
 
-The significance stars tells us visually that, with the exception of \textit{Minor\_Axis\_Length}, the features that are highly correlated to each other contributes strongly to the model, while the \textit{Eccentricity} and \textit{Extent} contribute very little.
-
-We can also measure the total variance explained by all predictors combined using $R^2 = 0.6953849$, and we can check the standardized coefficients to better compare predictors' importance. The results follow.
+We can also measure the total variance explained by all predictors combined using $R^2 = 0.6953849$, and we can check the standardized coefficients to better compare predictors' importance, as shown in table \ref{tab:standardized_coefficients}. Once again, we can see that Extent and Eccentricity contribute very little to the overall model.
 
 \begin{table}
   \centering
   \caption{Standardized regression coefficients}
   \label{tab:standardized_coefficients}
-  \begin{tabularx}{\textwidth}{lX}
+  \begin{tabularx}{0.45\textwidth}{lc}
     \toprule
     Parameter & Standardized Coefficient \\
     \midrule
@@ -99,11 +96,9 @@ We can also measure the total variance explained by all predictors combined usin
   \end{tabularx}
 \end{table}
 
-Once again, we can see that Extent and Eccentricity contribute very little to the overall model.
+\subsubsection{Principal Components}
 
-\subsection{Principal Components}
-
-A good way to aggregate and simplify data is by decomposing it into its principal components (centered in zero and scaled to have unit variance). Results follow.
+A good way to aggregate and simplify data is by decomposing it into its principal components (centered in zero and scaled to have unit variance). Components' summary can be seen in table \ref{tab:pca_importance}, and it shows us that more than ninety nine percent of overall variance can be explained with just three components, so a 2D visualization with only the first two components should give us a good idea of the whole dataset (figure \ref{fig:2pca_rice}). The plot suggests that data is well separated, with similar classes clustering nicely. This should make classification easier. 
 
 \begin{table}
   \centering
@@ -120,4 +115,55 @@ A good way to aggregate and simplify data is by decomposing it into its principa
   \end{tabularx}
 \end{table}
 
-We can see that more than ninety nine percent of overall variance can be explained with just three components, which means that not only we could make good prediction with lower degree data, but also that a 2D visualization of data that uses only two components should give us a good idea of the whole dataset.
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=.7\linewidth]{imgs/pca_plot_rice.png}
+  \caption{Plot with first two principal components of \textit{rice\_train} dataset.}
+    \Description{PC1 PC2 plot for rice dataset.}
+  \label{fig:2pca_rice}
+\end{figure}
+
+\subsection{Modeling}
+
+After exploring the dataset, I tried to find the best performing model for predicting the target.
+
+\subsubsection{Linear Regression}
+
+First I split the training dataset into training and validation sets, fitted the model and compute its \textit{MSE}. From this basic regression I got $MSE = 0.07354557$ and $RMSE = 0.2711929$. Since we know from the preliminary observations that some features are highly correlated (so the dataset suffers from collinearity), I tried to transform the dataset to reduce it. A straightforward solution is to compute the average of all of them (listing \ref{code:avg_rice_correlated}), but this yield a slightly worse result: $MSE \approx 0.074$.
+
+Another approach would be to drop features altogether, but first we want to measure their variance inflation factor. As a rule of thumb, a \textit{VIF} value above then indicates a problematic amount of collinearity, so I tired to drop features iteratively to see if the model improves, as shown in table \ref{tab:vif_drop_analysis}. For each dropped variable I computed the \textit{VIFs} and the \textit{MSE} of the resulting model. As we can see, dropping \textit{Area} resulted in performances similar to combining the variables, while dropping the other features worsened prediction performances even further.
+
+\begin{table}
+  \small
+  \centering
+  \caption{Effect of variable removal on variance inflation factors (VIF) and mean squared error (MSE)}
+  \label{tab:vif_drop_analysis}
+  \begin{tabularx}{\textwidth}{lccccccc}
+    \toprule
+    Variable Dropped & VIF Perimeter & VIF Major\_A\_L & VIF Minor\_A\_L & VIF Ecc. & VIF Convex\_A & VIF Extent & MSE \\
+    \midrule
+    Area              & 114 & 206 & 133 & 53 & 332 & 1 & 0.0735629 \\
+    Convex Area       & 108 & 134 & 40  & 49 & --  & 1 & 0.07572877 \\
+    Major Axis Length & 47  & --  & 37  & 29 & --  & 1 & 0.07718435 \\
+    Perimeter         & --  & --  & 1   & 1  & --  & 1 & 0.0806868 \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\begin{lstlisting}[language={R},label={code:avg_rice_correlated}, caption={Average of highly correlated features}]
+rice.train$Combined <- rowMeans(rice.train[, c("Area","Perimeter","Major_Axis_Length","Convex_Area")])
+
+linear_fit = lm(Class ~ 
+                Minor_Axis_Length
+                + Eccentricity
+                + Extent
+                + Combined, 
+                data=rice_train, 
+                subset = train
+                )
+
+pred <- predict(linear_fit, newdata = rice_train[test, ])
+mean((pred - y.test)^2)     # [1] 0.07439239
+\end{lstlisting}
+
+\subsubsection{Ridge Regression}
