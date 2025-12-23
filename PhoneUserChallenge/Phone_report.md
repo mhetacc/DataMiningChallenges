@@ -435,6 +435,8 @@ The resulting fit is with $mtry=8$ and variance as the split rule, with the foll
 - $RMSE = 1.986903$
 - $MSE = 3.947784$
 
+![](./imgs/rf_plot.png)
+
 This is the best result yet, proving our previous assumptions.
 Now all we have to do is to apply to the test dataset the same transformations of the training dataset, and predict *yhat*.
 
