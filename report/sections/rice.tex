@@ -32,7 +32,7 @@ We can use a correlation matrix to see exactly how related to each other the fea
 
 \begin{table}
   \centering
-  \caption{Correlation matrix of morphological parameters}
+  \caption{Correlation matrix of features}
   \label{tab:morphology_correlation}
   \begin{tabularx}{\textwidth}{lXXXXXXX}
     \toprule
@@ -57,7 +57,7 @@ To get a better idea on the importance of each feature, I trained a simple linea
 
 \begin{table}
   \centering
-  \caption{Regression coefficients for morphological parameters}
+  \caption{Regression coefficients and coefficients' importance}
   \label{tab:regression_coefficients}
   \begin{tabularx}{\textwidth}{lXXXXX}
     \toprule
@@ -75,6 +75,49 @@ To get a better idea on the importance of each feature, I trained a simple linea
   \end{tabularx}
 \end{table}
 
-The significance stars tells us that, with the exception of \textit{Minor\_Axis\_Length}, the features that are highly correlated to each other contributes strongly to the model, while the \textit{Eccentricity} and \textit{Extent} contribute very little.
+The significance stars tells us visually that, with the exception of \textit{Minor\_Axis\_Length}, the features that are highly correlated to each other contributes strongly to the model, while the \textit{Eccentricity} and \textit{Extent} contribute very little.
 
-We can also measure the total variance explained by all predictors combined using $R^2 = 0.6953849$.
+We can also measure the total variance explained by all predictors combined using $R^2 = 0.6953849$, and we can check the standardized coefficients to better compare predictors' importance. The results follow.
+
+\begin{table}
+  \centering
+  \caption{Standardized regression coefficients}
+  \label{tab:standardized_coefficients}
+  \begin{tabularx}{\textwidth}{lX}
+    \toprule
+    Parameter & Standardized Coefficient \\
+    \midrule
+    (Intercept)       & NA \\
+    Area              & 1.95970669 \\
+    Perimeter         & 0.60605955 \\
+    Major\_Axis\_Length & -0.77272038 \\
+    Minor\_Axis\_Length & 0.54256082 \\
+    Eccentricity      & 0.18931314 \\
+    Convex\_Area       & -3.09099064 \\
+    Extent            & 0.01114328 \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+Once again, we can see that Extent and Eccentricity contribute very little to the overall model.
+
+\subsection{Principal Components}
+
+A good way to aggregate and simplify data is by decomposing it into its principal components (centered in zero and scaled to have unit variance). Results follow.
+
+\begin{table}
+  \centering
+  \caption{Summary of principal components}
+  \label{tab:pca_importance}
+  \begin{tabularx}{\textwidth}{lXXXXXXXX}
+    \toprule
+    & PC1 & PC2 & PC3 & PC4 & PC5 & PC6 & PC7 & PC8 \\
+    \midrule
+    Standard deviation      & 2.2924  & 1.2436  & 0.9562  & 0.51393 & 0.10621 & 0.07758 & 0.04519 & 0.02052 \\
+    Proportion of Variance  & 0.6569  & 0.1933  & 0.1143  & 0.03302 & 0.00141 & 0.00075 & 0.00026 & 0.00005 \\
+    Cumulative Proportion   & 0.6569  & 0.8502  & 0.9645  & 0.99753 & 0.99894 & 0.99969 & 0.99995 & 1.00000 \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+We can see that more than ninety nine percent of overall variance can be explained with just three components, which means that not only we could make good prediction with lower degree data, but also that a 2D visualization of data that uses only two components should give us a good idea of the whole dataset.

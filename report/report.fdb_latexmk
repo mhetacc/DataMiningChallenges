@@ -1,13 +1,13 @@
 # Fdb version 4
-["bibtex report"] 1766503806.07731 "report.aux" "report.bbl" "report" 1766503806.14945 2
+["bibtex report"] 1766504528.87658 "report.aux" "report.bbl" "report" 1766504528.94379 2
   "./report.bib" 1764092357.72868 16522 cfad9219e56bfa9b09e4d8201dfbda5f ""
   "/usr/share/texlive/texmf-dist/bibtex/bst/acmart/ACM-Reference-Format.bst" 1653856601 90333 ccee583820c555b8fd3c6d1b9f362b14 ""
-  "report.aux" 1766503798.07487 32 3985256e7290058c681f74d7a3565a19 "pdflatex"
+  "report.aux" 1766504520.8744 32 3985256e7290058c681f74d7a3565a19 "pdflatex"
   (generated)
   "report.bbl"
   "report.blg"
   (rewritten before read)
-["pdflatex"] 1766503804.70273 "/home/mhetac/Documents/Data Mining/DataMiningChallenges/report/report.tex" "report.pdf" "report" 1766503805.96937 2
+["pdflatex"] 1766504527.4869 "/home/mhetac/Documents/Data Mining/DataMiningChallenges/report/report.tex" "report.pdf" "report" 1766504528.77002 2
   "/home/mhetac/Documents/Data Mining/DataMiningChallenges/report/report.tex" 1766503177.28238 8290 d40dbe8b84cc4b017524f0eadbffc7ce ""
   "/usr/share/texlive/texmf-dist/fonts/enc/dvips/fontawesome5/fa5free0.enc" 1622837620 3083 a707712f77b073b3833e4b1334a30e99 ""
   "/usr/share/texlive/texmf-dist/fonts/enc/dvips/fontawesome5/fa5free3.enc" 1622837620 2905 1556c73dc99638e0dfff2f132c244f30 ""
@@ -251,15 +251,15 @@
   "images/raftian7.png" 0 -1 0 ""
   "imgs/scatterplot_rice_loess.png" 1766499742.03278 805949 0a7f5e4497c7360000dccf9b8f9eac22 ""
   "lstlisting_settings.tex" 1764001821.59337 923 6c327df865b68b4ddddc74a9f42a2ca7 ""
-  "report.aux" 1766503798.07487 32 3985256e7290058c681f74d7a3565a19 "pdflatex"
-  "report.bbl" 1766503806.14639 0 d41d8cd98f00b204e9800998ecf8427e "bibtex report"
+  "report.aux" 1766504520.8744 32 3985256e7290058c681f74d7a3565a19 "pdflatex"
+  "report.bbl" 1766504528.94139 0 d41d8cd98f00b204e9800998ecf8427e "bibtex report"
   "report.out" 0 -1 0 "pdflatex"
   "report.tex" 1766503177.28238 8290 d40dbe8b84cc4b017524f0eadbffc7ce ""
   "sections/architecture.tex" 1764001821.60057 13315 e38437e2db478a1b4e18d4191c306e03 ""
   "sections/python.tex" 1764001821.60205 13954 8a53ed7d142866bdb183ebc083836cc9 ""
   "sections/raft.tex" 1764002240.08036 27603 9788cf8c9fdca8919177d92181b3da9a ""
   "sections/reflection.tex" 1764001821.60391 2099 4173d05091a4eec7831a0d52279c1d78 ""
-  "sections/rice.tex" 1766503804.49075 4448 de8bbbb8b69141e6a6ac8d587c1d116f ""
+  "sections/rice.tex" 1766504527.28539 6330 cb6978caa952860565581fd8ada2ad13 ""
   (generated)
   "report.aux"
   "report.log"
