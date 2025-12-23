@@ -392,7 +392,7 @@ lassoregression <- function(){
 
   #x_filtered <- x[, !colnames(x) %in% c("col1", "col2"), drop = FALSE]
 
-  x_filtered <- x[, !grepl("\\.ch|\\.val|\\.in|\\.sms|\\.cc$", colnames(x)), drop = FALSE]
+  x_filtered <- x[, !grepl("\\.val|\\.in|\\.sms|\\.cc$", colnames(x)), drop = FALSE]
 
   # best results
   x_filtered <- x[, !grepl("\\.in|\\.sms|\\.cc$", colnames(x)), drop = FALSE]
@@ -404,7 +404,6 @@ lassoregression <- function(){
 
   # merge offpeak and on peak of all
 months <- paste0("q0", 1:9)
-
 for (m in months) {
   ch_peak_col    <- paste0(m, ".out.ch.peak")
   ch_offpeak_col <- paste0(m, ".out.ch.offpeak")
@@ -418,17 +417,29 @@ for (m in months) {
   val_offpeak_col <- paste0(m, ".out.val.offpeak")
   val_total_col   <- paste0(m, ".out.val.tot")    
 
-  phone_train[[total_col]] <- rowSums(phone_train[, c(ch_peak_col, ch_offpeak_col)], na.rm = TRUE)
+  phone_train[[ch_total_col]] <- rowSums(phone_train[, c(ch_peak_col, ch_offpeak_col)], na.rm = TRUE)
 
-  phone_train[[total_col]] <- rowSums(phone_train[, c(dur_peak_col, dur_offpeak_col)], na.rm = TRUE)
+  phone_train[[dur_total_col]] <- rowSums(phone_train[, c(dur_peak_col, dur_offpeak_col)], na.rm = TRUE)
 
-  phone_train[[total_col]] <- rowSums(phone_train[, c(val_peak_col, val_offpeak_col)], na.rm = TRUE)
+  phone_train[[val_total_col]] <- rowSums(phone_train[, c(val_peak_col, val_offpeak_col)], na.rm = TRUE)
 }
 
-  x_filtered <- x[, !grepl("vas2|^payment|^activation|\\.in|\\.sms|\\.cc$", colnames(x)), drop = FALSE]
-
-
+# median of nine months for ch, dur and val
+metrics <- c("ch", "dur", "val")
+for (x in metrics) {
+  cols <- grep(paste0("^q0[1-9]\\.out\\.", x, "\\.tot$"),
+               names(phone_train),
+               value = TRUE)
+  
+  phone_train[[paste0("out.", x, ".median")]] <-
+    apply(phone_train[, cols, drop = FALSE], 1, median, na.rm = TRUE)
 }
+
+  x <- model.matrix(y ~ ., data=phone_train)[, -1]  
+
+  x_filtered <- x[, !grepl("\\.tot|\\offpeak|\\peak|vas2|^payment|^activation|\\.in|\\.sms|\\.cc$", colnames(x)), drop = FALSE]
+
+
 
   set.seed(1)
   library(glmnet)
@@ -442,7 +453,10 @@ for (m in months) {
 
     # LOG TRANSFORM, FILTER OUT DATA
 
-    set.seed(1)
+    # best results
+  x_filtered <- x[, !grepl("vas2|^payment|^activation|\\.in|\\.sms|\\.cc$", colnames(x)), drop = FALSE]
+
+  set.seed(1)
   library(glmnet)
   lasso_log_fit <- cv.glmnet(x_filtered[train, ], log(y[train]+1), alpha = 1)
   plot(lasso_log_fit)
@@ -452,6 +466,30 @@ for (m in months) {
   lasso_log_fit_rmse <- sqrt(lasso_log_fit_mse)
   lasso_log_fit_rmse
 
+  # log transform 
+  set.seed(1)
+  library(glmnet)
+  lasso_log_fit <- cv.glmnet(x_filtered[train, ], log(y[train]+1), alpha = 1)
+  plot(lasso_log_fit)
+  bestlam <- lasso_log_fit$lambda.min
+  lasso_log_fit_mse <- min(lasso_log_fit$cvm)
+  lasso_log_fit_mse
+  lasso_log_fit_rmse <- sqrt(lasso_log_fit_mse)
+  lasso_log_fit_rmse
+
+  # overwrite original coloumns with log trnasform
+  cols <- grep("^q0[1-9]\\.out\\.(ch|dur|val)\\.", names(phone_train), value = TRUE)
+  phone_train[cols] <- lapply(phone_train[cols], log1p)
+
+    set.seed(1)
+  library(glmnet)
+  lasso_fit <- cv.glmnet(x_filtered[train, ], y[train], alpha = 1)
+  plot(lasso_fit)
+  bestlam <- lasso_fit$lambda.min
+  lasso_fit_mse <- min(lasso_fit$cvm)
+  lasso_fit_mse
+  lasso_fit_rmse <- sqrt(lasso_fit_mse)
+  lasso_fit_rmse
 
 
   # FINALIZE MODEL WITH BEST LAMBDA
@@ -486,8 +524,11 @@ pcr <- function(){
   library(pls)
   set.seed(1)
 
-  # fit principal component regression with cross validation
-  pcr.fit <- pcr(y ~ ., data = phone_train, subset = train,
+  # No log trnasnform
+
+  x_filtered <- x[, !grepl("vas2|^payment|^activation|\\.in|\\.sms|\\.cc$", colnames(x)), drop = FALSE]
+
+  pcr.fit <- pcr(y ~ ., data = x_filtered, subset = train,
     scale = TRUE, validation = "CV")
   validationplot(pcr.fit, val.type = "MSEP")
 
@@ -498,6 +539,10 @@ pcr <- function(){
   pcr.pred <- predict(pcr.fit, x[test, ], ncomp = 7)
   mean((pcr.pred - y.test)^2)
  
+  # loglog transform
+
+
+
   # predict on whole dataset and predict yhat
   pcr.fit <- pcr(y ~ ., data = phone_train, scale = TRUE, ncomp = 6)
   yhat <- (predict(pcr.fit, newdata=phone_test, ncomp = 6)>1.5)+1
@@ -651,9 +696,6 @@ random_forest_parallel_ranger<-function(){
   
   set.seed(1)
   
-  # collinearity
-  phone_train$Combined <- rowMeans(phone_train[, c("Area","Perimeter","Major_Axis_Length","Convex_Area")])
-  
   
   # leverage multicores R capabilites
   library(doParallel)
@@ -662,44 +704,43 @@ random_forest_parallel_ranger<-function(){
 
   # load library and set validation method
   library(caret)
-  train.control <- trainControl(method  = "LOOCV")
+  train.control <- trainControl(method  = "cv")
 
-  ### FOR CLASSIFICATION ###
-  phone_train$y <- as.factor(phone_train$y) # necessary, caret will automatically do classification 
+
+
+  phone_train_filtered <- phone_train[, !grepl("vas2|^payment|^activation|\\.in|\\.sms|\\.cc$", colnames(phone_train)), drop = FALSE]
+
+  cols <- grep("^q0[1-9]\\.out\\.(ch|dur|val)\\.", names(phone_train_filtered), value = TRUE)
+  phone_train_filtered[cols] <- lapply(phone_train_filtered[cols], log1p)
+
 
   rf_fit <- train(
-    y~ .,
-    method     = "ranger",
-    tuneLength = 10,
-    trControl  = train.control,
-    metric     = "Accuracy",
-    data       = phone_train,
-    allowParallel = TRUE
-    )
-  
-  rf_predict <- predict(rf_fit, newdata = x[test, ])
-  #mean((rf_predict - y.test)^2)
-  confusionMatrix(rf_predict, y.test)
-
-  # predict actual yhat
-  yhat <- predict(rf_fit, newdata=phone_test)
-
-  ### FOR REGRESSION ###
-  rf_fit <- train(
-    y~ .,
+    log(y+1) ~ .,
     method     = "ranger",
     tuneLength = 10,
     trControl  = train.control,
     metric     = "RMSE",
-    data       = phone_train,
+    data       = phone_train_filtered,
     allowParallel = TRUE
     )
 
   rf_fit
 
-  # predict actual yhat
-  yhat <- (predict(rf_fit, newdata=phone_test)>1.5)+1
+  # predict actual yhat need to apply same transformations
 
+  phone_test_filtered <- phone_test[, !grepl("vas2|^payment|^activation|\\.in|\\.sms|\\.cc$", colnames(phone_test)), drop = FALSE]
+
+  #cols <- grep("^q0[1-9]\\.out\\.(ch|dur|val)\\.", names(phone_test_filtered), value = TRUE)
+  #phone_test_filtered[cols] <- lapply(phone_test_filtered[cols], log1p)
+
+  phone_test_filtered <- phone_test_filtered %>%
+  mutate(across(all_of(cols), ~ {
+    x <- log1p(.x)
+    x[is.nan(x)] <- 0
+    x
+  }))
+
+  yhat <- exp(predict(rf_fit, newdata=phone_test_filtered))-1
 
   stopCluster(cl)
 }

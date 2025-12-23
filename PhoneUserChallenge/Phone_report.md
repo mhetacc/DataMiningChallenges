@@ -389,9 +389,14 @@ Then, I filtered out incoming calls, SMS and calls to the call center, and fitte
 x_filtered <- x[, !grepl("\\.in|\\.sms|\\.cc$", colnames(x)), drop = FALSE]
 ```
 
-I then removed all monthly values except for outgoing call times. The mean square error is $MSE = 18207357$, so 6% worse than the model with all values, so the model performs better if we keep amount of calls and value of calls [TODO] VALUE OF CALLS TOO????
+Then, I filtered out some more monthly values, with these results:
+- Amount and value of calls filtered out: $MSE = 18207357$
+- Only value of calls filtered out: $MSE = 18067089$
+- Only amount of calls filtered out: $MSE = 18118489$
 
-Just for curiosity, I tried to remove non call related features (all of the following are with incoming calls, SMS and calls to call center filtered out):
+We can infer that both value and amount of calls are useful for prediction and should be kept.
+
+Then, I tried to remove non call related features (all of the following are with incoming calls, SMS and calls to call center filtered out):
 - Baseline with only incoming calls, SMS and calls to call-center filtered out: $MSE = 18040253$
 - No payment information: $MSE = 18035221$ 
 - No payment, no sex information: $MSE = 18036839$ 
@@ -411,45 +416,68 @@ On the other hand, dropping activation zone and channel seem to improve the mode
 Overall, it would seem that the best model is with payment, second value-added service, activation channel, activation zone, incoming calls, SMS and calls to call center filtered out.
 
 At this point I wanted to see whether some pre-processing on the monthly features could improve the prediction:
-- Peak and offpeak values added together: $MSE = $
-- Peak and offpeak values added together, prediction done on the average call time over nine months: $MSE = $ 
+- Peak and offpeak values added together: $MSE = 32024591$ 
+- Peak and offpeak values added together, prediction done on the average call time, number of calls and value over nine months: $MSE = 32174039$ 
 
-At this point I tried to do the filtering wit log-transforming the target value. The results follow:
-- log-transform target, filter out incoming calls, SMS and calls to the call center: $$ 
+It is quite evident that the best results are given by leaving off peak and peak features separated.
 
+Lastly, with the best-performing filtered dataset I did the following: 
+- log-transform target: $MSE = 6.253648$
+- log-transform monthly predictors: $MSE =20415157$
+- log-transform both: $MSE = 4.289544$
 
-## KNN
-
-Let's start with a baseline prediction using a simple KNN model for regression. I first tried to fit all the data, without logarithmically transform the target, but I had to change the validation method from Leave-One-Out-Cross-Validation to just Cross-Validation for lack of memory.
-
-```{bash}
-k-Nearest Neighbors 
-
-10000 samples
-   98 predictor
-
-Pre-processing: centered (100), scaled (100) 
-Resampling: Cross-Validated (10 fold) 
-Summary of sample sizes: 8999, 9000, 9001, 9000, 8999, 8999, ... 
-Resampling results across tuning parameters:
-
-  k   RMSE      Rsquared   MAE     
-   1  4510.530  0.4594312  1258.249
-      ........  ........   ........
-   8  4045.793  0.5674593  1123.891
-      ........  ........   ........
-  20  4140.494  0.5695263  1132.276
-
-RMSE was used to select the optimal model using the smallest value.
-The final value used for the model was k = 8.
-```
-
-It is quite evident that $MSE = 16368440.9988$ is a terrible result. I then tried to train the model on target $log(y+1)$ and got much better results: with $k=15$, $RMSE=2.367258$ and $MSE=5.60391043856$. Thus I predicted *yhat* as follows.
-
-```{r}
-yhat <- exp(predict(knn_fit, newdata=phone_test)-1)
-```
-
-## PCR
+While log-transforming only the target gave us worse results compared to the full-features set, doing so only on the predictors distorted the model. On the other hand, log transforming both gave us the best result yet.
 
 ## Random Forest
+
+Considering all of the above (not-normal distribution, skewness, etc) a model inherently robust to these problems should yield much better results. Random Forest is a good example of such a model. That being said, since log-transforming both target and predictor showed greater promise, and considering the time needed to fit a random forest, I trained the model on a transformed dataset. I run the model with the *ranger* method on a *tuneLength* of ten with cross-validation. Compared to the previous challenge I had to give up on LOOCV due to memory constraints.
+The resulting fit is with $mtry=8$ and variance as the split rule, with the following metrics:
+- $RMSE = 1.986903$
+- $MSE = 3.947784$
+
+This is the best result yet, proving our previous assumptions.
+Now all we have to do is to apply to the test dataset the same transformations of the training dataset, and predict *yhat*.
+
+Random forest output:
+
+```{r}
+Random Forest 
+
+10000 samples
+   58 predictor
+
+No pre-processing
+Resampling: Cross-Validated (10 fold) 
+Summary of sample sizes: 9001, 9000, 8999, 9000, 8999, 9000, ... 
+Resampling results across tuning parameters:
+
+  mtry  splitrule   RMSE      Rsquared   MAE     
+   2    variance    2.065022  0.6117146  1.588959
+   2    extratrees  2.132802  0.5924804  1.694349
+   8    variance    1.986903  0.6353229  1.433326
+   8    extratrees  2.005882  0.6290239  1.464940
+  14    variance    1.988681  0.6343575  1.422819
+  14    extratrees  1.999154  0.6308566  1.446108
+  21    variance    1.991103  0.6333259  1.418238
+  21    extratrees  1.995145  0.6321276  1.437309
+  27    variance    1.993801  0.6323001  1.416465
+  27    extratrees  1.995106  0.6320604  1.435745
+  33    variance    1.997575  0.6308933  1.417430
+  33    extratrees  1.993281  0.6326922  1.430834
+  40    variance    2.000561  0.6297957  1.417270
+  40    extratrees  1.994316  0.6322604  1.429231
+  46    variance    2.001524  0.6294456  1.417042
+  46    extratrees  1.991771  0.6331326  1.424699
+  52    variance    2.006544  0.6276035  1.418400
+  52    extratrees  1.993774  0.6323937  1.423943
+  59    variance    2.007706  0.6271860  1.418404
+  59    extratrees  1.994411  0.6320702  1.420154
+
+Tuning parameter 'min.node.size' was held constant at
+ a value of 5
+RMSE was used to select the optimal model using
+ the smallest value.
+The final values used for the model were mtry =
+ 8, splitrule = variance and min.node.size = 5.
+```
+
