@@ -1,5 +1,80 @@
 \section{Rice Varieties}
 
-\subsection{Dataset}
+\subsection{Preliminary Observations}
 
-All following considerations are made using the datasets provided on the challenge page (\textit{rice_test.csv} and \texitit{rice_train.csv}), but it is worth noting that a more complete version of them can be found at the [datasets source page](https://www.muratkoklu.com/datasets/). I used it to compute an alternative version of the *test* dataset that contains the true attribute for *Class*.
+\subsubsection{Dataset}
+
+All following considerations are made using the datasets provided on the challenge page (\textit{rice\_test.csv} and \textit{rice\_train.csv}), but it is worth noting that they both stem from an original one that can be found at the \href{https://www.muratkoklu.com/datasets/}{dataset source page}. I used it to compute an alternative version of the *test* dataset that contains the true attribute for \textit{Class}.
+
+\begin{lstlisting}[language={Python},label={code:mergedatasets}, caption={Merge datasets}]
+df1 = pd.read_csv("rice_test.csv").round(10)
+df2 = pd.read_csv("Rice_Cammeo_Osmancik.csv").round(10)
+
+keys = [col for col in df1.columns]
+merged = df1.merge(df2, on=keys, how="inner")
+\end{lstlisting}
+
+\subsubsection{Scatter Plot}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{imgs/scatterplot_rice_loess.png}
+  \caption{Scatter Plot for the \textit{rice\_train} dataset with LOESS smoothing lines for each class.}
+    \Description{Scatterplot of a multivariate dataset.}
+  \label{fig:scatterplot_rice_loess}
+\end{figure}
+
+From the \textit{scatter plot} we can infer that there are four features (\textit{Area}, \textit{Perimeter}, \textit{Convex\_Area} and \textit{Major\_Axis\_Length}) that seem to be extremely correlated
+
+\subsubsection{Correlation Matrix}
+
+We can use a correlation matrix to see exactly how related to each other the features are. The results are as follow.
+
+\begin{table}
+  \centering
+  \caption{Correlation matrix of morphological parameters}
+  \label{tab:morphology_correlation}
+  \begin{tabularx}{\textwidth}{lXXXXXXX}
+    \toprule
+    Area & Perimeter & Major\_Axis\_Length & Minor\_Axis\_Length & Eccentricity & Convex\_Area & Extent \\
+    \midrule
+    Area              &  1.00000000 &  0.96704011 &  0.90356325 &  0.79022701 &  0.34653177 &  0.99895272 & -0.06002223 \\
+    Perimeter         &  0.96704011 &  1.00000000 &  0.97163180 &  0.63486482 &  0.53784650 &  0.97046788 & -0.12718015 \\
+    Major\_Axis\_Length &  0.90356325 &  0.97163180 &  1.00000000 &  0.45675159 &  0.70625660 &  0.90390912 & -0.13562592 \\
+    Minor\_Axis\_Length &  0.79022701 &  0.63486482 &  0.45675159 &  1.00000000 & -0.29393931 &  0.78975480 &  0.06192558 \\
+    Eccentricity      &  0.34653177 &  0.53784650 &  0.70625660 & -0.29393931 &  1.00000000 &  0.34707340 & -0.19301157 \\
+    Convex\_Area       &  0.99895272 &  0.97046788 &  0.90390912 &  0.78975480 &  0.34707340 &  1.00000000 & -0.06397213 \\
+    Extent            & -0.06002223 & -0.12718015 & -0.13562592 &  0.06192558 & -0.19301157 & -0.06397213 &  1.00000000 \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+As suspected, all four features mentioned above have a high degree of correlation (over ninety percent). Once way to handle this is to either use models robust against collinearity, or to either combine or remove some of the correlated features.  
+
+\subsubsection{Features' Importance}
+
+To get a better idea on the importance of each feature, I trained a simple linear regression model, and looked at the result with \verb|summary(fit)|. The results follows.
+
+\begin{table}
+  \centering
+  \caption{Regression coefficients for morphological parameters}
+  \label{tab:regression_coefficients}
+  \begin{tabularx}{\textwidth}{lXXXXX}
+    \toprule
+    Parameter & Estimate & Std. Error & t value & Pr(>|t|) & Importance\\
+    \midrule
+    (Intercept)       & -2.152e+00 & 1.990e+00 & -1.081 & 0.279633 &  \\
+    Area              &  5.601e-04 & 1.023e-04 &  5.474 & 4.79e-08 & *** \\
+    Perimeter         &  8.440e-03 & 2.221e-03 &  3.800 & 0.000148 & *** \\
+    Major\_Axis\_Length & -2.198e-02 & 5.709e-03 & -3.851 & 0.000120 & *** \\
+    Minor\_Axis\_Length &  4.669e-02 & 1.213e-02 &  3.850 & 0.000121 & *** \\
+    Eccentricity      &  4.534e+00 & 1.828e+00 &  2.481 & 0.013170 & * \\
+    Convex\_Area       & -8.609e-04 & 9.418e-05 & -9.141 & < 2e-16 & *** \\
+    Extent            &  7.146e-02 & 7.144e-02 &  1.000 & 0.317237 &  \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+The significance stars tells us that, with the exception of \textit{Minor\_Axis\_Length}, the features that are highly correlated to each other contributes strongly to the model, while the \textit{Eccentricity} and \textit{Extent} contribute very little.
+
+We can also measure the total variance explained by all predictors combined using $R^2 = 0.6953849$.
