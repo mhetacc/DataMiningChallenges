@@ -282,7 +282,7 @@ Which means that, with seven principal components, PCR obtains:
 - $MSE = 0.07416117$
 - $RMSE = 0.2711929$
 
-Improving ever so slightly over lasso regression.
+Giving us a slightly worse result compared to lasso.
 
 Finally, we train the model on the whole data and use it to predict *yhat*.
 

@@ -98,12 +98,12 @@ We can also measure the total variance explained by all predictors combined usin
 
 \subsubsection{Principal Components}
 
-A good way to aggregate and simplify data is by decomposing it into its principal components (centered in zero and scaled to have unit variance). Components' summary can be seen in table \ref{tab:pca_importance}, and it shows us that more than ninety nine percent of overall variance can be explained with just three components, so a 2D visualization with only the first two components should give us a good idea of the whole dataset (figure \ref{fig:2pca_rice}). The plot suggests that data is well separated, with similar classes clustering nicely. This should make classification easier. 
+A good way to aggregate and simplify data is by decomposing it into its principal components (centered in zero and scaled to have unit variance). Components' summary can be seen in table \ref{tab:rice_pca_importance}, and it shows us that more than ninety nine percent of overall variance can be explained with just three components, so a 2D visualization with only the first two components should give us a good idea of the whole dataset (figure \ref{fig:rice_2pca_plot}). The plot suggests that data is well separated, with similar classes clustering nicely. This should make classification easier. 
 
 \begin{table}
   \centering
   \caption{Summary of principal components}
-  \label{tab:pca_importance}
+  \label{tab:rice_pca_importance}
   \begin{tabularx}{\textwidth}{lXXXXXXXX}
     \toprule
     & PC1 & PC2 & PC3 & PC4 & PC5 & PC6 & PC7 & PC8 \\
@@ -120,7 +120,7 @@ A good way to aggregate and simplify data is by decomposing it into its principa
   \includegraphics[width=.7\linewidth]{imgs/pca_plot_rice.png}
   \caption{Plot with first two principal components of \textit{rice\_train} dataset.}
     \Description{PC1 PC2 plot for rice dataset.}
-  \label{fig:2pca_rice}
+  \label{fig:rice_2pca_plot}
 \end{figure}
 
 \subsection{Modeling}
@@ -129,7 +129,7 @@ After exploring the dataset, I tried to find the best performing model for predi
 
 \subsubsection{Linear Regression}
 
-First I split the training dataset into training and validation sets, fitted the model and compute its \textit{MSE}. From this basic regression I got $MSE = 0.07354557$ and $RMSE = 0.2711929$. Since we know from the preliminary observations that some features are highly correlated (so the dataset suffers from collinearity), I tried to transform the dataset to reduce it. A straightforward solution is to compute the average of all of them (listing \ref{code:avg_rice_correlated}), but this yield a slightly worse result: $MSE \approx 0.074$.
+First I split the training dataset into training and validation sets, fitted the model and compute its \textit{MSE}. From this basic regression I got $MSE = 0.07354557$. Since we know from the preliminary observations that some features are highly correlated (so the dataset suffers from collinearity), I tried to transform the dataset to reduce it. A straightforward solution is to compute the average of all of them (listing \ref{code:avg_rice_correlated}), but this yield a slightly worse result: $MSE \approx 0.074$.
 
 Another approach would be to drop features altogether, but first we want to measure their variance inflation factor. As a rule of thumb, a \textit{VIF} value above then indicates a problematic amount of collinearity, so I tired to drop features iteratively to see if the model improves, as shown in table \ref{tab:vif_drop_analysis}. For each dropped variable I computed the \textit{VIFs} and the \textit{MSE} of the resulting model. As we can see, dropping \textit{Area} resulted in performances similar to combining the variables, while dropping the other features worsened prediction performances even further.
 
@@ -167,3 +167,106 @@ mean((pred - y.test)^2)     # [1] 0.07439239
 \end{lstlisting}
 
 \subsubsection{Ridge Regression}
+
+I used the \textit{glmnet} library, which takes care of the variable standardization for us, has a built-in cross-validation functionionality to compute the best possible $\lambda$. With code \ref{code:rice_ridge} we get a result worse than linear regression, since $MSE = 0.07924703$. That being said, we can see in plot \ref{fig:rice_ridge} an effective shrinkage of most coefficients towards zero, with the exception of Eccentricity, which we already recognized as not very impactful on the overall variance and prediction.
+
+\begin{lstlisting}[language={R},label={code:rice_ridge}, caption={Ridge regression on rice dataset}]
+library(glmnet)
+cv.out <- cv.glmnet(x[train, ], y[train], alpha = 0)
+plot(cv.out)
+bestlam <- cv.out$lambda.min
+cv_mse <- min(cv.out$cvm)     # [1] 0.07924703
+cv_rmse <- sqrt(cv_mse)       # [1] 0.2815085
+\end{lstlisting}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=.7\linewidth]{imgs/ridgeplot.png}
+  \caption{Ridge coefficients for \textit{rice\_train} dataset.}
+    \Description{Plot shows coefficient shrinkage for ridge regression.}
+  \label{fig:rice_ridge}
+\end{figure}
+
+\subsubsection{Lasso Regression}
+
+Very similar to ridge regression, except \textit{glmnet} gets called with \verb|alpha = 1|. We get a slightly better result than ridge, with $MSE = 0.07348723$. From the plot (in figure \ref{fig:rice_lasso}), we can see that once again Eccentricity seems to resist shrinkage, but overall coefficient reduction is much more accentuated compare to ridge, since lasso can set them to zero. 
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=.7\linewidth]{imgs/lassoplot.png}
+  \caption{Lasso coefficients for \textit{rice\_train} dataset.}
+    \Description{Plot shows coefficient shrinkage for lasso regression.}
+  \label{fig:rice_lasso}
+\end{figure}
+
+\subsubsection{Principal Components Regression}
+
+I fitted the model with \textit{pls} library built-in cross-validation, as seen in code \ref{code:rice_pcr}. The lowest error (figure \ref{fig:rice_pcr}) is achieved with seven components: $MSE =  0.07354557$, slightly worse than lasso regression.
+
+\begin{lstlisting}[language={R},label={code:rice_pcr}, caption={Principal components regression on rice dataset}]
+pcr.fit <- pcr(Class ~ ., 
+              data = rice_train, 
+              subset = train, 
+              scale = TRUE, 
+              validation = "CV"
+              )
+\end{lstlisting}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=.7\linewidth]{imgs/validationplot_pcr.png}
+  \caption{PCR cross-validation MSE error for target \textit{Class} on \textit{rice\_train} dataset.}
+    \Description{Plot shows MSE getting lower as components are added.}
+  \label{fig:rice_pcr}
+\end{figure}
+
+\subsubsection{Partial Least Squares}
+
+I used the same \textit{pls} library to fit the partial least squares model on the dataset. The best result is obtained with just two components (figure \ref{fig:rice_pls}), yielding $MSE = 0.07609556$, which is slightly worse than \textit{PCR} but needs a third of the components, potentially leading to less overfitting and computational cost.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=.7\linewidth]{imgs/validationplot_pls.png}
+  \caption{PLS cross-validation MSE error for target \textit{Class} on \textit{rice\_train} dataset.}
+    \Description{Plot shows MSE getting lower as components are added.}
+  \label{fig:rice_pls}
+\end{figure}
+
+\subsubsection{LOESS}
+
+I then tried some non-parametric methods, starting with \textit{LOESS} regression. This method allows up to four predictors, so I used the most useful ones previously identified: \textit{Area}, \textit{Perimeter}, \textit{Convex\_Area} and \textit{Major\_Axis\_Length}. Predictors are normalized by default. Then, fitted three models with three different values for \verb|span|. Predictions must be sanitized since there some test points can fall outside the local neighborhood, meaning being \verb|Na|. With $span = 0.1$ we have five such predictions. The code can be seen at \ref{code:rice_loess}. The results were disastrous, so I tried to include only two predictors. This yielded the best results yet out of all models: with $span = 0.1$, $MSE=0.06099749$. All results are summarized in table \ref{tab:rice_loess}
+
+\begin{lstlisting}[language={R},label={code:rice_loess}, caption={LOESS regression on rice dataset with four predictors and $span=1$}]
+loess_fit1 <- loess(Class ~ Area 
+                    + Perimeter 
+                    + Convex_Area 
+                    + Major_Axis_Length, 
+                    data = rice_train, 
+                    subset = train, 
+                    span = 0.1
+                    )
+
+pred1 <- predict(loess_fit1, newdata = rice_train[test, ])
+mean((pred1 - y.test)^2, na.rm = TRUE)    # [1] 46.0226
+\end{lstlisting}
+
+\begin{table}
+  \centering
+  \caption{MSE for LOESS with different \textit{span} values and number of predictors}
+  \label{tab:rice_loess}
+  \begin{tabularx}{.4\textwidth}{ccc}
+    \toprule
+    Span & Number of Predictors & MSE \\
+    \midrule
+    0.1 & Four (4) & 46.0226 \\
+    0.5 & Four (4) & 1.799422 \\
+    0.9 & Four (4) & 0.2276324 \\
+    \midrule
+    0.1 & Two (2) & 0.06099749 \\
+    0.5 & Two (2) & 0.06514592 \\
+    0.9 & Two (2) & 0.06836381 \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\subsubsection{K-Nearest Neighbors}
