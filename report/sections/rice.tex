@@ -309,3 +309,37 @@ knn_fit <- train(
     \Description{Graphs with error rate and precision for KNN models with different number of neighbors.}
     \label{fig:rice_knn}
 \end{figure}
+
+\subsubsection{Random Forest}
+
+The last method I tried is \textit{random forest} with Leave-One-Out-Cross-Validation, using the \textit{caret} library still. Since this method is extremely computationally expensive, I had to leverage the library \textit{doParallel} to use all available CPU cores, and I used the \textit{ranger} method instead, which is a faster random forest implementation. I also reduced the amount of predictors by combining the highly correlated ones (we already saw that dropping them yield similar to worse results). The code can be seen at \ref{rice_randomforest}.
+
+The optimal model, with $mtry = 2$, $splitrule = extratress$ and $min.node.size = 5$, yielded a slighly worse result than KNN trained on all features: $MSE = 0.0589397$. The plot for \textit{RMSE} can be seen in figure \ref{rice_randomforest}
+
+\begin{lstlisting}[language={R},label={code:rice_randomforest}, caption={Random Forest regression on \textit{rice\_train} dataset with Leave-One-Out-Cross-Validation}]
+train.control <- trainControl(method  = "LOOCV")
+
+rf_fit <- train(
+  Class ~ Minor_Axis_Length + Eccentricity + Extent + Combined,
+  method     = "ranger",
+  tuneLength = 10,
+  trControl  = train.control,
+  metric     = "RMSE",
+  data       = rice_train,
+  allowParallel = TRUE
+)
+\end{lstlisting}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=.7\linewidth]{imgs/randomforest.png}
+  \caption{RMSE error for random forest on \textit{rice\_train} dataset.}
+    \Description{Plot shows MSE getting lower as components are added.}
+  \label{fig:rice_pls}
+\end{figure}
+
+\subsection{Rice Varieties Conclusions}
+
+The best model so far is KNN with $K = [19,20]$. While slightly more computationally expensive than other methods (with the exception of random forest) it improves MSE by $0.00411343$ over the second best method (LOESS with $span = 0.1$). I decided to use predict the target with a KNN fit in classification mode, since I felt it more logically sound.
+
+I decided not to try random forest with all predictors for time constraints: it required a 10-Cores machine (i7-13620H @ 4.90 GHz) twenty-five minutes to fit the model.

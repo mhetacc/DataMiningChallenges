@@ -1,5 +1,5 @@
 # Fdb version 4
-["pdflatex"] 1766591947.95793 "/home/mhetac/Documents/Data Mining/DataMiningChallenges/report/report.tex" "report.pdf" "report" 1766591948.80747 0
+["pdflatex"] 1766594357.43621 "/home/mhetac/Documents/Data Mining/DataMiningChallenges/report/report.tex" "report.pdf" "report" 1766594358.32219 0
   "/home/mhetac/Documents/Data Mining/DataMiningChallenges/report/report.tex" 1766580619.27336 7533 93a439e3717b1f17c5418bdfac18d89a ""
   "/usr/share/texlive/texmf-dist/fonts/enc/dvips/inconsolata/i4-t1-4.enc" 1558214095 7693 0f2dce6d313c82989ec3a67fc24df2a0 ""
   "/usr/share/texlive/texmf-dist/fonts/enc/dvips/libertine/lbtn_25tcsq.enc" 1490131464 2921 8ca0eb0831f9bc5da080d3697cfe67bf ""
@@ -222,15 +222,16 @@
   "imgs/knn_regression.png" 1766499741.93025 59385 58a8f82dd9cb3f9588f8a2e90c63a7c3 ""
   "imgs/lassoplot.png" 1766499741.94134 69670 1f8c56f8dbace45bcfacd8b790129a67 ""
   "imgs/pca_plot_rice.png" 1766499741.96018 577451 0010b817d4659b1dd2082a6ce21cf263 ""
+  "imgs/randomforest.png" 1766499741.97542 69132 279b70f7df5db42237560a6bc853a0fd ""
   "imgs/ridgeplot.png" 1766499742.00634 62953 b54da096a87289c8401674cb29e4d036 ""
   "imgs/scatterplot_rice_loess.png" 1766499742.03278 805949 0a7f5e4497c7360000dccf9b8f9eac22 ""
   "imgs/validationplot_pcr.png" 1766499742.04153 33291 0945822ca505282e95399762d95efff0 ""
   "imgs/validationplot_pls.png" 1766499742.05772 32029 3714112d1b061fecdb8ad4a30a89c3b5 ""
   "lstlisting_settings.tex" 1764001821.59337 923 6c327df865b68b4ddddc74a9f42a2ca7 ""
-  "report.aux" 1766591948.69674 8755 7726d61599a1c18fd147244373b02195 "pdflatex"
-  "report.out" 1766591948.69674 536 aadd92f73e2a7af6de1d81b1e0d2044f "pdflatex"
+  "report.aux" 1766594358.20161 9704 dc208dbf440d829d78795cbf15f2a021 "pdflatex"
+  "report.out" 1766594358.2024 752 5d4d991bc27f809a27d1eab40e5ad400 "pdflatex"
   "report.tex" 1766580619.27336 7533 93a439e3717b1f17c5418bdfac18d89a ""
-  "sections/rice.tex" 1766591947.75521 16683 838a302ae53a1ca49bab965313ad7dd2 ""
+  "sections/rice.tex" 1766594357.2214 18825 a30a848bb37686a7fb8690c7bc3448ed ""
   (generated)
   "report.aux"
   "report.log"

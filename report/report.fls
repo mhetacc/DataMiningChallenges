@@ -1414,6 +1414,14 @@ INPUT ./imgs/knn_classification.png
 INPUT imgs/knn_classification.png
 INPUT ./imgs/knn_classification.png
 INPUT ./imgs/knn_classification.png
+INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/libertine/LinLibertineTB-tlf-t1.tfm
+INPUT /usr/share/texlive/texmf-dist/fonts/vf/public/libertine/LinLibertineTB-tlf-t1.vf
+INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/libertine/LinLibertineTB-tlf-t1--base.tfm
+INPUT ./imgs/randomforest.png
+INPUT ./imgs/randomforest.png
+INPUT imgs/randomforest.png
+INPUT ./imgs/randomforest.png
+INPUT ./imgs/randomforest.png
 INPUT /usr/share/texlive/texmf-dist/tex/generic/stringenc/se-pdfdoc.def
 INPUT /usr/share/texlive/texmf-dist/tex/generic/stringenc/se-pdfdoc.def
 INPUT /usr/share/texlive/texmf-dist/tex/generic/stringenc/se-pdfdoc.def
