@@ -153,14 +153,15 @@ Another approach would be to drop features altogether, but first we want to meas
 \begin{lstlisting}[language={R},label={code:avg_rice_correlated}, caption={Average of highly correlated features}]
 rice.train$Combined <- rowMeans(rice.train[, c("Area","Perimeter","Major_Axis_Length","Convex_Area")])
 
-linear_fit = lm(Class ~ 
-                Minor_Axis_Length
-                + Eccentricity
-                + Extent
-                + Combined, 
-                data=rice_train, 
-                subset = train
-                )
+linear_fit = lm(
+  Class ~ 
+  Minor_Axis_Length
+  + Eccentricity
+  + Extent
+  + Combined, 
+  data=rice_train, 
+  subset = train
+  )
 
 pred <- predict(linear_fit, newdata = rice_train[test, ])
 mean((pred - y.test)^2)     # [1] 0.07439239
@@ -204,12 +205,13 @@ Very similar to ridge regression, except \textit{glmnet} gets called with \verb|
 I fitted the model with \textit{pls} library built-in cross-validation, as seen in code \ref{code:rice_pcr}. The lowest error (figure \ref{fig:rice_pcr}) is achieved with seven components: $MSE =  0.07354557$, slightly worse than lasso regression.
 
 \begin{lstlisting}[language={R},label={code:rice_pcr}, caption={Principal components regression on rice dataset}]
-pcr.fit <- pcr(Class ~ ., 
-              data = rice_train, 
-              subset = train, 
-              scale = TRUE, 
-              validation = "CV"
-              )
+pcr.fit <- pcr(
+  Class ~ ., 
+  data = rice_train, 
+  subset = train, 
+  scale = TRUE, 
+  validation = "CV"
+  )
 \end{lstlisting}
 
 \begin{figure}[h]
@@ -237,14 +239,15 @@ I used the same \textit{pls} library to fit the partial least squares model on t
 I then tried some non-parametric methods, starting with \textit{LOESS} regression. This method allows up to four predictors, so I used the most useful ones previously identified: \textit{Area}, \textit{Perimeter}, \textit{Convex\_Area} and \textit{Major\_Axis\_Length}. Predictors are normalized by default. Then, fitted three models with three different values for \verb|span|. Predictions must be sanitized since there some test points can fall outside the local neighborhood, meaning being \verb|Na|. With $span = 0.1$ we have five such predictions. The code can be seen at \ref{code:rice_loess}. The results were disastrous, so I tried to include only two predictors. This yielded the best results yet out of all models: with $span = 0.1$, $MSE=0.06099749$. All results are summarized in table \ref{tab:rice_loess}
 
 \begin{lstlisting}[language={R},label={code:rice_loess}, caption={LOESS regression on rice dataset with four predictors and $span=1$}]
-loess_fit1 <- loess(Class ~ Area 
-                    + Perimeter 
-                    + Convex_Area 
-                    + Major_Axis_Length, 
-                    data = rice_train, 
-                    subset = train, 
-                    span = 0.1
-                    )
+loess_fit1 <- loess(
+  Class ~ Area 
+  + Perimeter 
+  + Convex_Area 
+  + Major_Axis_Length, 
+  data = rice_train, 
+  subset = train, 
+  span = 0.1
+  )
 
 pred1 <- predict(loess_fit1, newdata = rice_train[test, ])
 mean((pred1 - y.test)^2, na.rm = TRUE)    # [1] 46.0226
@@ -270,3 +273,39 @@ mean((pred1 - y.test)^2, na.rm = TRUE)    # [1] 46.0226
 \end{table}
 
 \subsubsection{K-Nearest Neighbors}
+
+I used the \textit{caret} library to fit \textit{KNN} classification both for regression and classification. The former to get a comparable prediction with the other models, the latter to be more logically sound, since \textit{Class} is a categorical target. The code for classification can be seen at \ref{code:rice_knn}, for regression the only difference is the \verb|metric| parameter: \verb|"Accuracy"| for classification, \verb|"RMSE"| for regression. For both methods I used Leave-One-Out-Cross-Validation, and both RMSE plots can be seen in figure \ref{fig:rice_knn}. 
+
+For regression, the best result is achieved with nineteen neighbors, yielding a mean square error even better than LOESS: $MSE = 0.05688406$. For classification, the best accuracy is achieved with twenty neighbors, yielding an accuracy of almost 93\%. This last model is the one I ultimately used to predict the target values on the test dataset.
+
+\begin{lstlisting}[language={R},label={code:rice_knn}, caption={KNN regression on rice dataset with Leave-One-Out-Cross-Validation}]
+train.control <- trainControl(method  = "LOOCV")
+train$Class <- as.factor(train$Class) # necessary for classification 
+
+knn_fit <- train(
+  Class ~ .,
+  method     = "knn",
+  tuneGrid   = expand.grid(k = 1:20),
+  trControl  = train.control,
+  preProcess = c("center","scale"),    # normalized
+  metric     = "Accuracy",
+  data       = train
+  )
+\end{lstlisting}
+
+\begin{figure}[h]
+    \centering
+    \begin{subfigure}{0.4\textwidth}
+        \includegraphics[width=\linewidth]{imgs/knn_regression.png}
+        \caption{RMSE of KNN for regression}
+    \end{subfigure}
+    \hspace{.05\linewidth}
+    \begin{subfigure}{0.4\textwidth}
+        \includegraphics[width=\linewidth]{imgs/knn_classification.png}
+        \caption{Accuracy of KNN for classification}
+    \end{subfigure}
+
+    \caption{RMSE and Accuracy respectively of KNN for regression and for classification with \textit{LOOCV} on \textit{rice\_train} dataset.}
+    \Description{Graphs with error rate and precision for KNN models with different number of neighbors.}
+    \label{fig:rice_knn}
+\end{figure}

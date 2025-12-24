@@ -365,6 +365,8 @@ We used the [caret](https://topepo.github.io/caret/) package to handle KNN class
 Since up to this point we always used $MSE$ as performance metric, if we want to be consistent we need to train the model in the same way. We can let caret take care of everything and see the results.
 
 ```{r}
+  train.control <- trainControl(method  = "LOOCV")
+
   train$Class <- as.factor(train$Class) # necessary, caret will automatically do classification 
 
   knn_fit <- train(
