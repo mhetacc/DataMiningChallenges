@@ -1,6 +1,6 @@
 # Fdb version 4
-["pdflatex"] 1766602812.23718 "/home/mhetac/Documents/Data Mining/DataMiningChallenges/report/report.tex" "report.pdf" "report" 1766602816.78712 0
-  "/home/mhetac/Documents/Data Mining/DataMiningChallenges/report/report.tex" 1766601154.85505 7557 08406e29818a4863a16ceb70f8e6dd79 ""
+["pdflatex"] 1766614648.57959 "/home/mhetac/Documents/Data Mining/DataMiningChallenges/report/report.tex" "report.pdf" "report" 1766614652.66868 0
+  "/home/mhetac/Documents/Data Mining/DataMiningChallenges/report/report.tex" 1766614531.1322 10894 24a6c7803f92b3bcb9ff674aa417ff8d ""
   "/usr/share/texlive/texmf-dist/fonts/enc/dvips/inconsolata/i4-t1-4.enc" 1558214095 7693 0f2dce6d313c82989ec3a67fc24df2a0 ""
   "/usr/share/texlive/texmf-dist/fonts/enc/dvips/libertine/lbtn_25tcsq.enc" 1490131464 2921 8ca0eb0831f9bc5da080d3697cfe67bf ""
   "/usr/share/texlive/texmf-dist/fonts/enc/dvips/libertine/lbtn_76gpa5.enc" 1490131464 2933 9ad527ce78d7c5fa0a642dead095f172 ""
@@ -225,6 +225,8 @@
   "imgs/monthly_calls.png" 1766601987.16924 26948 16b859f5216cb0254bd0cf5fe892476c ""
   "imgs/monthly_calltime.png" 1766601977.87739 23360 f605b02d3e1cf7a72469b07a832e6552 ""
   "imgs/pca_plot_rice.png" 1766499741.96018 577451 0010b817d4659b1dd2082a6ce21cf263 ""
+  "imgs/phone_log_y_hist.png" 1766499724.81748 27994 6eb29753e9229073370fed148ca990a0 ""
+  "imgs/phone_y_hist.png" 1766499724.82008 24492 4c02c2963c006901f3282ed5e85fccd1 ""
   "imgs/randomforest.png" 1766499741.97542 69132 279b70f7df5db42237560a6bc853a0fd ""
   "imgs/ridgeplot.png" 1766499742.00634 62953 b54da096a87289c8401674cb29e4d036 ""
   "imgs/scatter_age_over_calltime.png" 1766499724.83211 380074 2818cfe250009024fbbeb31ea099f0f2 ""
@@ -236,10 +238,10 @@
   "imgs/validationplot_pcr.png" 1766601032.77938 27933 73eff454836c8d38fca8f5316f94fcc6 ""
   "imgs/validationplot_pls.png" 1766601073.95038 26906 4331dcd2ecbb1e52373207861cd16d81 ""
   "lstlisting_settings.tex" 1764001821.59337 923 6c327df865b68b4ddddc74a9f42a2ca7 ""
-  "report.aux" 1766602816.5714 13032 124bc1359c940f654d77f334a3584d5d "pdflatex"
-  "report.out" 1766602816.5734 1390 88f6ddcd0de2f7af36b198d790d85510 "pdflatex"
-  "report.tex" 1766601154.85505 7557 08406e29818a4863a16ceb70f8e6dd79 ""
-  "sections/phone.tex" 1766602807.4854 6431 b9d0bc9b05e486845b260d99c8f27d92 ""
+  "report.aux" 1766614652.4412 14772 cc4304cb1b3e84ee3cfd3af8557bd533 "pdflatex"
+  "report.out" 1766614652.4422 1709 728a43d67148f271a28673e07eb10d78 "pdflatex"
+  "report.tex" 1766614531.1322 10894 24a6c7803f92b3bcb9ff674aa417ff8d ""
+  "sections/phone.tex" 1766614645.28579 10241 9510ea699b37f4863d314609a3037065 ""
   "sections/rice.tex" 1766594357.2214 18825 a30a848bb37686a7fb8690c7bc3448ed ""
   (generated)
   "report.aux"

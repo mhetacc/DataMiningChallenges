@@ -86,6 +86,7 @@ Let's try to see if calls amount and time are related to other features.
 First I plotted total calls taken and total calls time over nine months (figure \ref{fig:phone_calltimesandamount}). We can see that the graphs are almost identical from a trend standpoint, hinting at a strong correlation between number of calls and time spent calling. 
 
 Then I wanted to see whether sex plays any role in total call time. Using the library \textit{dplyr} I computed all data in table \ref{tab:calltime_sex_cuts}. On average, men's calls seem to last 8\% longer. To mitigate the effect of outliers I filtered out the top 1\%, which still shows the same trend, albeit reduced to 5\%. Cutting even further the top 10\% shows a bigger increase in men's average call times of about 10\%. Lastly, I tired to log-transform the data. Even in this situation we see that men have longer calls, hinting that this predictor may be useful. 
+I did exactly the same with payment methods, activation zones, activation channels and both value-added services, always cutting off the top 1\%,. All data can be seen in table \ref{tab:calltime_over_all}. There seem to be quite a bit of variance in call time compared to the tariff plan, which would make sense: some plans may be geared toward calling, while others are more suited sending SMS. We can see some variance on payment method too. Activation zone and activation channel seem to have some influence on call times, with the exception of zone eight, whose call times are way lower. On the other hand, customers that have activated either first or second added-value services seem to do longer calls.
 
 \begin{figure}[h]
     \centering
@@ -130,6 +131,67 @@ Then I wanted to see whether sex plays any role in total call time. Using the li
     \bottomrule
   \end{tabularx}
 \end{table}
+
+\begin{table}
+  \centering
+  \caption{Call time over different categorical features}
+  \label{tab:calltime_over_all}
+  \begin{tabularx}{.73\textwidth}{lccc}
+    \toprule
+    Feature & Number of customers & Total call time & Average call time \\
+    \midrule
+    Tariff plan 3 &  781 &  44811041  &  57376 \\
+    Tariff plan 4 &   83 &  10575009  & 127410 \\
+    Tariff plan 6 &  724 &  92214268  & 127368 \\
+    Tariff plan 7 & 3564 & 489635465  & 137384 \\
+    Tariff plan 8 & 4748 & 134616150  &  28352 \\
+    \midrule
+    Activation zone1 & 3507 & 288670845 & 82313 \\
+    Activation zone2 & 3130 & 213438509 & 68191 \\
+    Activation zone3 & 2342 & 197941555 & 84518 \\
+    Activation zone4 &  921 &  71801024 & 77960 \\
+    \midrule
+    Activation channel 2 &  130 &  10643060 &  81870 \\
+    Activation channel 3 &  408 &  36663577 &  89862 \\
+    Activation channel 4 &   31 &   2369822 &  76446 \\
+    Activation channel 5 & 7135 & 623961079 &  87451 \\
+    Activation channel 6 &   47 &   4352853 &  92614 \\
+    Activation channel 7 &  652 &  62777153 &  96284 \\
+    Activation channel 8 &  111 &  12074180 & 108776 \\
+    Activation channel 9 & 1386 &  19010209 &  13716 \\
+    \midrule
+    Value-added one: No & 7450 & 526620961 &  70687 \\
+    Value-added one: Yes & 2450 & 245230972 & 100094 \\
+    \midrule
+    Value-added two: No & 9279 & 695404226 &  74944 \\
+    Value-added two: Yes &  621 &  76447707 & 123104 \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\subsubsection{Skewness}
+
+Call time data is usually positively skewed, with many users having low usage and a small number of user with very high usage (e.g.,50.000 seconds). This is easily verifiable at a glance if we look at the density graph in figure \ref{fig:phone_call_density}. This effect can be mitigated by log-transforming the data, as shown in figure \ref{fig:phone_log_call_density}. Moreover, with the \textit{e1071} library I computed a skewness matrix for all features (appendix \ref{app:phone_skewness}): we can see that all monthly-based data (calls, call times, SMS, costs, etc) are highly positively skewed. To manage this problem we can either transform them (log, square root or Box-Cox transform), or use more robust models (such as random forest, Gamma/Poisson or quantile regression). Methods like linear. ridge or lasso regression, and even some non-parametric ones like KNN are not ideal. 
+
+\begin{figure}[h]
+    \centering
+    \begin{subfigure}{0.4\textwidth}
+        \includegraphics[width=\linewidth]{imgs/phone_y_hist.png}
+        \caption{Call time density distribution}
+        \label{fig:phone_call_density}
+    \end{subfigure}
+        \hspace{.05\linewidth}
+    \begin{subfigure}{0.4\textwidth}
+        \includegraphics[width=\linewidth]{imgs/phone_log_y_hist.png}
+        \caption{Call time density distribution (log-transformed)}
+        \label{fig:phone_log_call_density}
+    \end{subfigure}
+    \caption{Call time density distributions.}
+    \Description{Graphs showing call times density}
+    \label{fig:phone_calltimesandamount}
+\end{figure}
+
+\subsubsection{Correlation Matrix}
 
 
 \subsection{Modeling}
