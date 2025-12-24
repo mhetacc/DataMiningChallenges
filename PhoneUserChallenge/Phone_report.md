@@ -23,7 +23,7 @@ Let's first briefly analyze the dataset.
     - $|SMS|$
     - $|calls to call center|$
 
-Considering that the target is *monthly call time* we can make the hypothesis that some features do not interest us, specifically: *value added service 1* and *2*, any monthly feature not concerning with call time itself, leaving us with only $time(expensive calls)$ and $time(cheap calls)$, which we could further assume can be summed between each other since overall cost is not a concern. Moreover, there is the possibility that any feature other than time can be discarded. It goes without saying that all of the above should be proved empirically.
+Considering that the target is *monthly call time* we can make the hypothesis that some features do not interest us, specifically: *value added service 1* and *2*, any monthly feature not concerning with call time itself, leaving us with only $time(expensive calls)$ and $time(cheap calls)$, which we could further assume can be combined since overall cost is not a concern. It goes without saying that all of the above will have to be be proven empirically.
 
 
 ## Scatterplot

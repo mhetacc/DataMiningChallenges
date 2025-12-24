@@ -1,0 +1,137 @@
+\section{Phone Users}
+
+\subsection{Preliminary Observations}
+
+\subsubsection{Dataset}
+
+Let's first briefly analyze the dataset.
+
+\begin{itemize}
+\small
+  \item \textbf{For each user:}
+  \begin{itemize}
+    \item Plan type
+    \item Payment method
+    \item Sex
+    \item Activation zone
+    \item Activation channel
+    \item Value-added service 1
+    \item Value-added service 2
+    \item \textbf{For each month:}
+    \begin{itemize}
+      \item $|\text{expensive calls}|$
+      \item $|\text{cheap calls}|$
+      \item $\text{time}(\text{expensive calls})$
+      \item $\text{time}(\text{cheap calls})$
+      \item $\text{cost}(\text{expensive calls})$
+      \item $\text{cost}(\text{cheap calls})$
+      \item $|\text{incoming calls}|$
+      \item $\text{time}(\text{incoming calls})$
+      \item $|\text{SMS}|$
+      \item $|\text{calls to call center}|$
+    \end{itemize}
+  \end{itemize}
+\end{itemize}
+
+Considering that the target is monthly call time we can make the hypothesis that some features do not interest us, for example any monthly feature not concerning with call time itself, leaving us with only $time(expensive calls)$ and $time(cheap calls)$, which we could further assume can be combined since overall cost is not a concern. It goes without saying that all of the above will have to be be proven empirically.
+
+\subsubsection{Scatter Plot}
+
+I filtered out all not call time-related monthly data. The result (figure \ref{fig:phone_scatter_full}) is a bit hard to read due to its sheer size. Looking at it more up close we can infer some things: first of all we see that call data looks positively skewed (figure \ref{fig:phone_scatter_call}), and that there are some activation channels that see more call time than others, while activation regions seem to differ lightly between one another (figure \ref{fig:phone_scatter_geog+channel}). On the other hand, plan and sex seem to have an impact on call time (figure \ref{fig:phone_scatter_plan+sex}), while age does not seem to have a big impact, with the exception of the very young and very old (figure \ref{fig:phone_scatter_age}).
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=.8\linewidth]{imgs/scatterplot_phone_full_20perc.png}
+  \caption{Scatter Plot for the filtered \textit{phone\_train} dataset.}
+    \Description{Scatterplot of a multivariate dataset.}
+  \label{fig:phone_scatter_full}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=.7\linewidth]{imgs/scatter_calldata.png}
+  \caption{Scatter Plot for call time for \textit{phone\_train} dataset.}
+    \Description{Scatterplot of multivariate call time.}
+  \label{fig:phone_scatter_call}
+\end{figure}
+
+\begin{figure}[h]
+    \centering
+    \begin{subfigure}{0.35\textwidth}
+        \includegraphics[width=\linewidth]{imgs/scatter_geog+channel_overcalltime.png}
+        \caption{Activation zone (X-asis, L) and activation channel (X-axis, R) over call time (Y axis)}
+        \label{fig:phone_scatter_geog+channel}
+    \end{subfigure}
+    \hspace{.005\linewidth}
+    \begin{subfigure}{0.35\textwidth}
+        \includegraphics[width=\linewidth]{imgs/scatter_plan+sex_over_calltime.png}
+        \caption{Plan type (X-axis, L) and sex (X-axis, R) over call time (Y axis)}
+        \label{fig:phone_scatter_plan+sex}
+    \end{subfigure}
+        \hspace{.005\linewidth}
+    \begin{subfigure}{0.175\textwidth}
+        \includegraphics[width=\linewidth]{imgs/scatter_age_over_calltime.png}
+        \caption{Age (X-axis) over call time (Y-axis)}
+        \label{fig:phone_scatter_age}
+    \end{subfigure}
+
+    \caption{Different features plotted over call time.}
+    \Description{Many multivariate graphs showing different features plotted over call time.}
+    \label{fig:phone_scatter_allovercalls}
+\end{figure}
+
+\subsubsection{Call Features Over Everything Else}
+
+Let's try to see if calls amount and time are related to other features.
+First I plotted total calls taken and total calls time over nine months (figure \ref{fig:phone_calltimesandamount}). We can see that the graphs are almost identical from a trend standpoint, hinting at a strong correlation between number of calls and time spent calling. 
+
+Then I wanted to see whether sex plays any role in total call time. Using the library \textit{dplyr} I computed all data in table \ref{tab:calltime_sex_cuts}. On average, men's calls seem to last 8\% longer. To mitigate the effect of outliers I filtered out the top 1\%, which still shows the same trend, albeit reduced to 5\%. Cutting even further the top 10\% shows a bigger increase in men's average call times of about 10\%. Lastly, I tired to log-transform the data. Even in this situation we see that men have longer calls, hinting that this predictor may be useful. 
+
+\begin{figure}[h]
+    \centering
+    \begin{subfigure}{0.4\textwidth}
+        \includegraphics[width=\linewidth]{imgs/monthly_calls.png}
+        \caption{Total amount of calls per month}
+    \end{subfigure}
+    \hspace{.05\linewidth}
+    \begin{subfigure}{0.4\textwidth}
+        \includegraphics[width=\linewidth]{imgs/monthly_calltime.png}
+        \caption{Total call time per month}
+    \end{subfigure}
+
+    \caption{Total calls and total call time per month.}
+    \Description{Graphs showing total calls and total call time per month.}
+    \label{fig:phone_calltimesandamount}
+\end{figure}
+
+\begin{table}
+  \centering
+  \caption{Call time statistics by sex under different data cuts and transformations}
+  \label{tab:calltime_sex_cuts}
+  \begin{tabularx}{.75\textwidth}{lcccc}
+    \toprule
+    Type of cut & Sex & Number of customers & Total call time & Average call time \\
+    \midrule
+    None (raw)      & B & 5266 & 557266412 & 105823 \\
+    None (raw)      & F & 1030 &  62493290 &  60673 \\
+    None (raw)      & M & 3704 & 242226228 &  65396 \\
+    \midrule
+    Top 1\% cut     & B & 5201 & 498846876 &  95914 \\
+    Top 1\% cut     & F & 1025 &  57203392 &  55808 \\
+    Top 1\% cut     & M & 3674 & 215801665 &  58738 \\
+    \midrule
+    Top 10\% cut    & B & 4595 & 276063673 &  60079 \\
+    Top 10\% cut    & F &  960 &  32400501 &  33751 \\
+    Top 10\% cut    & M & 3445 & 130747836 &  37953 \\
+    \midrule
+    Log-transformed & B & 5266 & 557266412 & 10.00 \\
+    Log-transformed & F & 1030 &  62493290 &  8.24 \\
+    Log-transformed & M & 3704 & 242226228 &  8.58 \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+
+\subsection{Modeling}
+
+\subsection{Phone Users Conclusions}
