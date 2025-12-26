@@ -1,8 +1,8 @@
 # Data Mining Course - University of Padua Master's CS
 
 Analysis and model fitting of two datasets:
-- ![Rice challenge](https://www.datachallenge.it/competitions/224)
-- ![Phone users challenge](https://www.datachallenge.it/competitions/158)
+- [Rice challenge](https://www.datachallenge.it/competitions/224)
+- [Phone users challenge](https://www.datachallenge.it/competitions/158)
 
 Objective:
 - Rice: predict rice variety, target categorical
@@ -14,8 +14,8 @@ A full pdf report can be seen at: ![mhetacc/DataMiningChallenges/report.pdf](htt
 
 ### Rice Varieties 
 
-[](/report/imgs/scatterplot_rice_loess.png)
+![](./report/imgs/scatterplot_rice_loess.png)
 
 ### Phone Users
 
-[](report/imgs/scatterplot_phone_full_20perc.png)
+![](./report/imgs/scatterplot_phone_full_20perc.png)
