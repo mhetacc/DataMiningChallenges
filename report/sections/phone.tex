@@ -75,7 +75,7 @@ I filtered out all not call time-related monthly data. The result (figure \ref{f
         \label{fig:phone_scatter_age}
     \end{subfigure}
 
-    \caption{Different features plotted over call time.}
+    \caption{Different features plotted over call time for the \textit{phone\_train} dataset.}
     \Description{Many multivariate graphs showing different features plotted over call time.}
     \label{fig:phone_scatter_allovercalls}
 \end{figure}
@@ -100,7 +100,7 @@ I did exactly the same with payment methods, activation zones, activation channe
         \caption{Total call time per month}
     \end{subfigure}
 
-    \caption{Total calls and total call time per month.}
+    \caption{Total calls and total call time per month for the \textit{phone\_train} dataset.}
     \Description{Graphs showing total calls and total call time per month.}
     \label{fig:phone_calltimesandamount}
 \end{figure}
@@ -186,14 +186,89 @@ Call time data is usually positively skewed, with many users having low usage an
         \caption{Call time density distribution (log-transformed)}
         \label{fig:phone_log_call_density}
     \end{subfigure}
-    \caption{Call time density distributions.}
-    \Description{Graphs showing call times density}
+    \caption{Call time density distributions for the \textit{phone\_train} dataset.}
+    \Description{Graphs showing call times density.}
     \label{fig:phone_calltimesandamount}
 \end{figure}
 
 \subsubsection{Correlation Matrix}
 
+Since \verb|cor| function only works on numerical data, I transformed all categorical with the \verb|model.matrix| function. We can infer the following: age is correlated to all call-related monthly features by roughly 25\%, first and second value-added services are correlated to some, not all, monthly features by roughly 10\%, and the only features that share significant correlation are the monthly call-related ones, for example in month four, outgoing call time and call expenses share a correlation of 97\%, while for the seventh month the correlation drop to 57\%, which is still significant. 
+
+\subsubsection{Linear Regression Insights}
+
+A preliminary analysis can be done by plotting a linear regression fit (figure \ref{fig:phone_4lnplots}). We can see that the data presents high heteroskedasticity, skewness and in general it is not normally distributed. There are also potential outliers and influential points that could distort the model, such as point 9853. As for features relevance (appendix \ref{app:phone_ln_features_relevance}), for the most part, relevant features are the one related to monthly calls. It is interesting to notice that the second month does not seem to count much, even thought it presents a similar amount of call data compared to the others.
+
+Log-transforming the target variable yielded better results (figure \ref{fig:phone_4loglnplots}), but the above mentioned problems did not disappear. Feature relevance held some surprises (appendix \ref{app:phone_log_ln_features_relevance}), for example categorical features contributed much more to the model and only a small subset of monthly call data was relevant.
+
+\begin{figure}[h]
+    \centering
+    \begin{subfigure}{0.4\textwidth}
+        \includegraphics[width=\linewidth]{imgs/4plots_ln.png}
+        \caption{Linear regression fit plot}
+        \label{fig:phone_4lnplots}
+    \end{subfigure}
+        \hspace{.05\linewidth}
+    \begin{subfigure}{0.4\textwidth}
+        \includegraphics[width=\linewidth]{imgs/4plots_ln_log.png}
+        \caption{Linear regression fit plot (log-transformed)}
+        \label{fig:phone_4loglnplots}
+    \end{subfigure}
+
+    \caption{Linear regression fit plots for \textit{phone\_train} dataset.}
+    \Description{Graphs showing linear regression fits}
+\end{figure}
+
+\subsubsection{Principal Components}
+
+Data as-is can be transformed into 101 principal components, and the cumulative proportion with only two is approximately 0.45. To get to 99\% of explained variance we need 69 components. Plotting the first two components shows us, once again, signs of heteroskedasticity and non-normal data distribution, as shown in figure \ref{fig:phone_pca}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=.7\linewidth]{imgs/PCAphone.png}
+  \caption{Scatter Plot for call time for the \textit{phone\_train} dataset.}
+    \Description{Scatterplot of multivariate call time.}
+  \label{fig:phone_pca}
+\end{figure}
+
+\subsubsection{Premilinary Observations Conclusions}
+
+Data shows high skewness and heteroskedasticity, and some features do not seem to contribute much to the model. We probably should try to filter out some data, for example SMS amount, transform monthly call data, for example with log or Box-Cox transforms, and use some robust regression methods, such as quantile or tree-based approaches.
 
 \subsection{Modeling}
 
+\subsubsection{Lasso Regression}
+
+I used lasso regression with cross-validation as a preliminary diagnostic tool to check which features drop or transform.
+First, I made a baseline prediction without transforming any value, with the following mean square error: $MSE = 18091358$. Not great, but expected since we saw in the preliminary observations many signs of non-linearity.
+
+I then tried log-transforming the target value (with all features), which resulted in a massive improvement: $MSE = 6.200236$. 
+
+Then, on the not transformed target, I tried different predictions with different data filtering, with the following results: filtering out incoming calls, SMS and calls to the call center yielded a 3\% improvement over the all-features model ($MSE = 18040253$). Putting calls to the call center back in worsened the model slightly ($MSE = 18080968$). I thus decided to leave these features filtered out permanently.
+
+Then, I tired to filter out out either both or any between calls value and calls amount, which produced a worse performing model in all instances. Then, I filtered out non monthly features, and discovered in the end that the best result ($MSE = 18019454$) can be obtained with the following features \textbf{filtered out}: payment method, value-added service two, activation zone and activation channel (plus, of course, the previously mentioned incoming calls, SMS and calls to the call center).
+
+I then tried to pre-process the monthly features, such as adding together peak and off-peak values or predict on the average monthly call times. All yielded worse results.
+
+Lastly, wit the best performing filtering, I log-transformed only the target ($MSE = 6.253648$), only the monthly features ($MSE =20415157$), and then both, which ultimately yielded the bet result: $MSE = 4.289544$. It is worth nothing that log-transforming the target on the filtered dataset produce a worse performing fit than a model fitted on all data and log-transformed target. 
+
+To summarize: the best performing model is obtained by filtering out payment method, value-added service two, activation zone, activation channel, incoming calls, SMS and calls to the call center, and by log-transforming the target and the remaining monthly call-related features.
+
+The complete list of filtering and transformations can be seen in appendix \ref{app:phone_lasso_filtering}
+
+\subsubsection{Random Forest}
+
+Considering all of the above a model inherently robust to non-normally distributed data should yield better results. Random Forest is a good example of such a model. I still log-transforming both target and predictor since it showed good results, and fitting this type of model requires a lot of time. I run the model with the \verb|ranger| method on a \verb|tuneLength| of ten with cross-validation. Compared to the previous challenge I had to give up on LOOCV due to memory constraints.
+The resulting best fit (figure \ref{fig:phone_randomorest},with $mtry=8$, variance as the split rule and minimum node size of five) yielded the best mean square error overall: $MSE = 3.947784$, which is why I ultimately used this model to predict the target value.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=.7\linewidth]{imgs/rf_plot.png}
+  \caption{RMSE for random forest for the \textit{phone\_train} dataset.}
+    \Description{RMSE for a random forest fit.}
+  \label{fig:phone_randomforest}
+\end{figure}
+
 \subsection{Phone Users Conclusions}
+
+The dataset was, in fact, highly not normally distributed and non-linear, so transforming the features greatly improved a linear fit such as lasso. Moreover, using a robust model yielded even better results, proving our hypothesis.

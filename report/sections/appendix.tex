@@ -1,0 +1,153 @@
+\section{Appendices}
+\subsection{Phone call time skewness}
+\label{app:phone_skewness}
+
+\begin{lstlisting}[language={bash}, caption={Skweness matrix}]
+        tariff.plan  activation.channel     q01.out.ch.peak    q01.out.dur.peak    q01.out.val.peak 
+          -2.026605            1.073333            4.930308            5.883900           10.158610 
+q01.out.dur.offpeak q01.out.val.offpeak       q01.in.ch.tot      q01.in.dur.tot          q01.ch.sms 
+           9.336163           31.977903            4.322467            3.615376           37.220847 
+    q02.out.ch.peak    q02.out.dur.peak    q02.out.val.peak  q02.out.ch.offpeak q02.out.dur.offpeak 
+           4.011558            5.026925            6.120357            9.636244            9.202850 
+      q02.in.ch.tot      q02.in.dur.tot          q02.ch.sms           q02.ch.cc     q03.out.ch.peak 
+           3.657302            3.444048           38.464828           10.697464            3.742071 
+   q03.out.val.peak  q03.out.ch.offpeak q03.out.dur.offpeak q03.out.val.offpeak       q03.in.ch.tot 
+           4.144170            8.709344            9.948054           25.074765            3.359255 
+         q03.ch.sms           q03.ch.cc     q04.out.ch.peak    q04.out.dur.peak    q04.out.val.peak 
+          35.231226           12.146903            3.726583            4.415209            3.988589 
+q04.out.dur.offpeak q04.out.val.offpeak       q04.in.ch.tot      q04.in.dur.tot          q04.ch.sms 
+          12.366396           10.517232            3.362859            3.660378           33.513288 
+    q05.out.ch.peak    q05.out.dur.peak    q05.out.val.peak  q05.out.ch.offpeak q05.out.dur.offpeak 
+           3.578910            4.056863            4.242749           12.129119           12.598793 
+      q05.in.ch.tot      q05.in.dur.tot          q05.ch.sms           q05.ch.cc     q06.out.ch.peak 
+           3.450009            3.165951           38.804264            9.085293            3.364608 
+   q06.out.val.peak  q06.out.ch.offpeak q06.out.dur.offpeak q06.out.val.offpeak       q06.in.ch.tot 
+           4.037063           15.035554           12.511158           10.149751            3.386507 
+         q06.ch.sms           q06.ch.cc     q07.out.ch.peak    q07.out.dur.peak    q07.out.val.peak 
+          28.668984           13.747535            3.157588            4.088846            3.830199 
+q07.out.dur.offpeak q07.out.val.offpeak       q07.in.ch.tot      q07.in.dur.tot          q07.ch.sms 
+          12.907377           10.128761            3.237636            3.192192           28.628610 
+    q08.out.ch.peak    q08.out.dur.peak    q08.out.val.peak  q08.out.ch.offpeak q08.out.dur.offpeak 
+           3.963771            4.131527            4.117853            9.256204           11.536043 
+      q08.in.ch.tot      q08.in.dur.tot          q08.ch.sms           q08.ch.cc     q09.out.ch.peak 
+           3.972012            3.953185           20.317293            8.946827            2.927636 
+   q09.out.val.peak  q09.out.ch.offpeak q09.out.dur.offpeak q09.out.val.offpeak       q09.in.ch.tot 
+           3.646469           10.344301           15.974234           11.674903            2.728376 
+         q09.ch.sms           q09.ch.cc                   y 
+          16.048910           13.034136           10.820427 
+\end{lstlisting}
+
+\subsection{Linear Regression Features Relevance}
+\label{app:phone_ln_features_relevance}
+
+\begin{lstlisting}[language={bash}, caption={Linear regression features relevance}]
+                                      t value Pr(>|t|)    
+(Intercept)                            15.136  < 2e-16 ***
+tariff.plan                           -23.320  < 2e-16 ***
+payment.methodDomiciliazione Bancaria   2.029 0.042513 *  
+age                                    -3.290 0.001004 ** 
+activation.channel                      2.445 0.014485 *  
+vas1Y                                   2.637 0.008389 ** 
+q01.out.ch.peak                        -2.998 0.002725 ** 
+q01.out.dur.offpeak                     3.006 0.002652 ** 
+q01.out.val.offpeak                    -6.760 1.46e-11 ***
+q03.out.val.peak                        3.534 0.000411 ***
+q03.in.dur.tot                         -4.009 6.15e-05 ***
+q04.out.dur.peak                       -3.183 0.001460 ** 
+q04.out.val.peak                        2.320 0.020335 *  
+q04.out.ch.offpeak                     -4.137 3.55e-05 ***
+q05.out.ch.offpeak                      2.194 0.028282 *  
+q05.out.dur.offpeak                    -2.375 0.017556 *  
+q05.out.val.offpeak                     3.723 0.000198 ***
+q05.in.ch.tot                          -3.401 0.000674 ***
+q05.in.dur.tot                          2.231 0.025735 *  
+q06.out.dur.peak                       -3.182 0.001469 ** 
+q06.out.val.peak                        2.791 0.005260 ** 
+q06.out.ch.offpeak                     -4.226 2.40e-05 ***
+q06.out.val.offpeak                     4.772 1.85e-06 ***
+q06.in.dur.tot                          2.642 0.008249 ** 
+q07.out.dur.peak                        3.250 0.001160 ** 
+q07.in.ch.tot                           4.881 1.07e-06 ***
+q07.in.dur.tot                         -4.645 3.45e-06 ***
+q08.out.ch.peak                         2.856 0.004293 ** 
+q08.out.val.peak                       -4.434 9.33e-06 ***
+q08.out.ch.offpeak                     -4.099 4.19e-05 ***
+q08.out.dur.offpeak                     4.495 7.04e-06 ***
+q08.out.val.offpeak                     2.112 0.034720 * 
+q09.out.ch.peak                        -6.673 2.64e-11 ***
+q09.out.dur.peak                       -0.825 0.409148    
+q09.out.val.peak                       11.179  < 2e-16 ***
+q09.out.ch.offpeak                     10.026  < 2e-16 ***
+q09.out.dur.offpeak                    18.656  < 2e-16 ***
+q09.out.val.offpeak                    -4.800 1.61e-06 ***
+q09.ch.cc                              -2.097 0.036019 *  
+\end{lstlisting}
+
+\subsection{Linear Regression Log-Transformed Features Relevance}
+\label{app:phone_log_ln_features_relevance}
+
+\begin{lstlisting}[language={bash}, caption={Linear regression log-transformed features relevance}]
+                                      Pr(>|t|)    
+(Intercept)                            < 2e-16 ***
+tariff.plan                            < 2e-16 ***
+payment.methodCarta di Credito        0.007256 ** 
+payment.methodDomiciliazione Bancaria 0.001023 ** 
+sexF                                  0.000623 ***
+sexM                                  6.81e-09 ***
+age                                    < 2e-16 ***
+activation.channel                    4.42e-07 ***
+vas1Y                                 2.43e-10 ***
+q01.out.ch.peak                       0.004972 ** 
+q01.in.dur.tot                        0.009498 ** 
+q03.out.ch.peak                       0.016320 *   
+q04.out.dur.peak                      0.002052 ** 
+q04.out.val.peak                      0.012237 *  
+q04.out.ch.offpeak                    0.031593 *  
+q04.ch.cc                             0.036098 *   
+q05.in.ch.tot                         0.041127 *  
+q06.out.val.offpeak                   0.032902 *  
+q07.out.dur.offpeak                   0.014165 *  
+q07.out.val.offpeak                   0.004209 ** 
+q08.out.ch.peak                       0.009375 ** 
+q09.out.ch.peak                        < 2e-16 ***
+q09.out.val.peak                      0.000828 ***
+q09.out.ch.offpeak                    3.27e-08 ***
+q09.in.ch.tot                         0.000294 ***
+q09.ch.sms                            0.001544 ** 
+\end{lstlisting}
+
+\subsection{Lasso Regression Progressive Filtering And Transformations Results}
+\label{app:phone_lasso_filtering}
+
+\begin{itemize}
+        \item No filtering: $MSE = 18091358$;
+        \item Only log-transform target:$MSE = 6.200236$;
+        \item Filtered incoming calls, SMS and calls to the call center: $MSE = 18040253$;
+        \item Filtered incoming calls, SMS: $MSE = 18080968$;
+        \item Only Value of calls filtered out: $MSE = 18067089$;
+        \item Only amount of calls filtered out: $MSE = 18118489$;
+        \item Incoming calls, SMS, call-center calls, and payment information filtered out: $MSE = 18035221$;
+        \item Incoming calls, SMS, call-center calls, payment information, and sex filtered out: $MSE = 18036839$;
+        \item Incoming calls, SMS, call-center calls, payment information, sex, activation zone, and activation channel filtered out: $MSE = 18034269$;
+        \item Incoming calls, SMS, call-center calls, payment information, sex, activation zone, activation channel, and age filtered out: $MSE = 18034610$;
+        \item Incoming calls, SMS, call-center calls, payment information, sex, activation zone, activation channel, age, and plan information filtered out: $MSE = 18975290$;
+        \item Incoming calls, SMS, call-center calls, payment information, sex, activation zone, activation channel, age, plan information, and value-added services filtered out: $MSE = 18969265$;
+        \item Incoming calls, SMS, call-center calls, payment information, value-added services, activation zone, and activation channel filtered out: $MSE = 18021270$;
+        \item Incoming calls, SMS, call-center calls, payment information, value-added services, and activation zone filtered out: $MSE = 18022544$;
+        \item Incoming calls, SMS, call-center calls, payment information, value-added services, and activation channel filtered out: $MSE = 18024845$;
+        \item Incoming calls, SMS, call-center calls, payment information, value-added service 1, activation zone, and activation channel filtered out: $MSE = 18035228$;
+        \item Incoming calls, SMS, call-center calls, payment information, value-added service 2, activation zone, and activation channel filtered out: $\mathbf{MSE = 18019454}$ \textbf{(best)}.
+\end{itemize}
+
+Transformations:
+\begin{itemize}
+        \item Peak and off-peak values aggregated together: $MSE = 32024591$;
+        \item Peak and off-peak values aggregated together, with prediction performed on average call time, number of calls, and value over nine months: $MSE = 32174039$.
+\end{itemize}
+
+With best filtering:
+\begin{itemize}
+        \item Log-transform of the target variable only: $MSE = 6.253648$;
+        \item Log-transform of the monthly predictors only: $MSE = 20415157$;
+        \item Log-transform of both the target variable and the monthly predictors: $MSE = 4.289544$.
+\end{itemize}
