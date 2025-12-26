@@ -1,1 +1,21 @@
-Data Mining Course - UNIPD Master's CS
+# Data Mining Course - University of Padua Master's CS
+
+Analysis and model fitting of two datasets:
+- ![Rice challenge](https://www.datachallenge.it/competitions/224)
+- ![Phone users challenge](https://www.datachallenge.it/competitions/158)
+
+Objective:
+- Rice: predict rice variety, target categorical
+- Phone: predict monthly call time, target numerical
+
+A full pdf report can be seen at: ![mhetacc/DataMiningChallenges/report.pdf](https://github.com/mhetacc/DataMiningChallenges/blob/main/report/report.pdf)
+
+## Scatter Plots
+
+### Rice Varieties 
+
+![](report/imgs/scatterplot_rice_loess.png)
+
+### Phone Users
+
+![](report/imgs/scatterplot_phone_full_20perc.png)
