@@ -4,40 +4,39 @@
 
 \subsubsection{Dataset}
 
-Let's first briefly analyze the dataset.
-
+Let's first briefly analyze the features of the dataset:
 \begin{itemize}
 \small
   \item \textbf{For each user:}
   \begin{itemize}
-    \item Plan type
-    \item Payment method
-    \item Sex
-    \item Activation zone
-    \item Activation channel
-    \item Value-added service 1
-    \item Value-added service 2
+    \item Plan type;
+    \item Payment method;
+    \item Sex;
+    \item Activation zone;
+    \item Activation channel;
+    \item Value-added service 1;
+    \item Value-added service 2;
     \item \textbf{For each month:}
     \begin{itemize}
-      \item $|\text{expensive calls}|$
-      \item $|\text{cheap calls}|$
-      \item $\text{time}(\text{expensive calls})$
-      \item $\text{time}(\text{cheap calls})$
-      \item $\text{cost}(\text{expensive calls})$
-      \item $\text{cost}(\text{cheap calls})$
-      \item $|\text{incoming calls}|$
-      \item $\text{time}(\text{incoming calls})$
-      \item $|\text{SMS}|$
-      \item $|\text{calls to call center}|$
+      \item $|\text{expensive calls}|$;
+      \item $|\text{cheap calls}|$;
+      \item $\text{time}(\text{expensive calls})$;
+      \item $\text{time}(\text{cheap calls})$;
+      \item $\text{cost}(\text{expensive calls})$;
+      \item $\text{cost}(\text{cheap calls})$;
+      \item $|\text{incoming calls}|$;
+      \item $\text{time}(\text{incoming calls})$;
+      \item $|\text{SMS}|$;
+      \item $|\text{calls to call center}|$.
     \end{itemize}
   \end{itemize}
 \end{itemize}
 
-Considering that the target is monthly call time we can make the hypothesis that some features do not interest us, for example any monthly feature not concerning with call time itself, leaving us with only $time(expensive calls)$ and $time(cheap calls)$, which we could further assume can be combined since overall cost is not a concern. It goes without saying that all of the above will have to be be proven empirically.
+Considering that the target is monthly calls time, we can make the hypothesis that some features can be ignored, for example any monthly feature not related to calls time itself, leaving us with only $time(expensive calls)$ and $time(cheap calls)$, which, since overall cost is not a concern, we could further assume can be combined. It goes without saying that all of the above must be proven empirically.
 
 \subsubsection{Scatter Plot}
 
-I filtered out all not call time-related monthly data. The result (figure \ref{fig:phone_scatter_full}) is a bit hard to read due to its sheer size. Looking at it more up close we can infer some things: first of all we see that call data looks positively skewed (figure \ref{fig:phone_scatter_call}), and that there are some activation channels that see more call time than others, while activation regions seem to differ lightly between one another (figure \ref{fig:phone_scatter_geog+channel}). On the other hand, plan and sex seem to have an impact on call time (figure \ref{fig:phone_scatter_plan+sex}), while age does not seem to have a big impact, with the exception of the very young and very old (figure \ref{fig:phone_scatter_age}).
+I filtered out all non-calls-time-related monthly data. The result (figure \ref{fig:phone_scatter_full}) is a bit hard to read due to its sheer size. Looking at it up close yields more insights: first of all we see that calls data looks positively skewed (figure \ref{fig:phone_scatter_call}), and that there are some activation channels that see more calls time than others, while activation regions seem to differ little between one another (figure \ref{fig:phone_scatter_geog+channel}). On the other hand, plan and sex seem to have an impact on calls time (figure \ref{fig:phone_scatter_plan+sex}), while age does not seem to have a big impact, with the exception of the very young and very old (figure \ref{fig:phone_scatter_age}).
 
 \begin{figure}[h]
   \centering
@@ -50,8 +49,8 @@ I filtered out all not call time-related monthly data. The result (figure \ref{f
 \begin{figure}[h]
   \centering
   \includegraphics[width=.7\linewidth]{imgs/scatter_calldata.png}
-  \caption{Scatter Plot for call time for \textit{phone\_train} dataset.}
-    \Description{Scatterplot of multivariate call time.}
+  \caption{Scatter Plot for calls time for \textit{phone\_train} dataset.}
+    \Description{Scatterplot of multivariate calls time.}
   \label{fig:phone_scatter_call}
 \end{figure}
 
@@ -59,34 +58,34 @@ I filtered out all not call time-related monthly data. The result (figure \ref{f
     \centering
     \begin{subfigure}{0.35\textwidth}
         \includegraphics[width=\linewidth]{imgs/scatter_geog+channel_overcalltime.png}
-        \caption{Activation zone (X-asis, L) and activation channel (X-axis, R) over call time (Y axis)}
+        \caption{Activation zone (X-axis, L) and activation channel (X-axis, R) over calls time (Y axis)}
         \label{fig:phone_scatter_geog+channel}
     \end{subfigure}
     \hspace{.005\linewidth}
     \begin{subfigure}{0.35\textwidth}
         \includegraphics[width=\linewidth]{imgs/scatter_plan+sex_over_calltime.png}
-        \caption{Plan type (X-axis, L) and sex (X-axis, R) over call time (Y axis)}
+        \caption{Plan type (X-axis, L) and sex (X-axis, R) over calls time (Y axis)}
         \label{fig:phone_scatter_plan+sex}
     \end{subfigure}
         \hspace{.005\linewidth}
     \begin{subfigure}{0.175\textwidth}
         \includegraphics[width=\linewidth]{imgs/scatter_age_over_calltime.png}
-        \caption{Age (X-axis) over call time (Y-axis)}
+        \caption{Age (X-axis) over calls time (Y-axis)}
         \label{fig:phone_scatter_age}
     \end{subfigure}
 
-    \caption{Different features plotted over call time for the \textit{phone\_train} dataset.}
-    \Description{Many multivariate graphs showing different features plotted over call time.}
+    \caption{Different features plotted over calls time for the \textit{phone\_train} dataset.}
+    \Description{Many multivariate graphs showing different features plotted over calls time.}
     \label{fig:phone_scatter_allovercalls}
 \end{figure}
 
-\subsubsection{Call Features Over Everything Else}
+\subsubsection{Calls Features Over Everything Else}
 
-Let's try to see if calls amount and time are related to other features.
+I then wanted to see if calls amount and time were related to other features.
 First I plotted total calls taken and total calls time over nine months (figure \ref{fig:phone_calltimesandamount}). We can see that the graphs are almost identical from a trend standpoint, hinting at a strong correlation between number of calls and time spent calling. 
 
-Then I wanted to see whether sex plays any role in total call time. Using the library \textit{dplyr} I computed all data in table \ref{tab:calltime_sex_cuts}. On average, men's calls seem to last 8\% longer. To mitigate the effect of outliers I filtered out the top 1\%, which still shows the same trend, albeit reduced to 5\%. Cutting even further the top 10\% shows a bigger increase in men's average call times of about 10\%. Lastly, I tired to log-transform the data. Even in this situation we see that men have longer calls, hinting that this predictor may be useful. 
-I did exactly the same with payment methods, activation zones, activation channels and both value-added services, always cutting off the top 1\%,. All data can be seen in table \ref{tab:calltime_over_all}. There seem to be quite a bit of variance in call time compared to the tariff plan, which would make sense: some plans may be geared toward calling, while others are more suited sending SMS. We can see some variance on payment method too. Activation zone and activation channel seem to have some influence on call times, with the exception of zone eight, whose call times are way lower. On the other hand, customers that have activated either first or second added-value services seem to do longer calls.
+Then I wanted to see whether sex plays any role in total calls time. Using the library \textit{dplyr} I computed all data in table \ref{tab:calltime_sex_cuts}. On average, men's calls seem to last 8\% longer. To mitigate the effect of outliers I filtered out the top 1\%, which still shows the same trend, albeit reduced to 5\%. Cutting even further the top 10\% shows a bigger increase in men's average calls times of about 10\%. Lastly, I tried to log-transform the data. Even in this situation we see that men have longer calls, hinting that this predictor may be useful. 
+I did exactly the same with payment methods, activation zones, activation channels and both value-added services, always cutting off the top 1\%. All data can be seen in table \ref{tab:calltime_over_all}. There seem to be quite a bit of variance in calls time compared to the tariff plan, which would make sense: some plans may be geared toward calling, while others are more suited for sending SMS. We can see some variance on payment method too. Activation zone and activation channel seem to have some influence on calls times, with the exception of zone eight, whose calls times are way lower. On the other hand, customers that have activated either first or second added-value services seem to call for longer.
 
 \begin{figure}[h]
     \centering
@@ -97,21 +96,21 @@ I did exactly the same with payment methods, activation zones, activation channe
     \hspace{.05\linewidth}
     \begin{subfigure}{0.4\textwidth}
         \includegraphics[width=\linewidth]{imgs/monthly_calltime.png}
-        \caption{Total call time per month}
+        \caption{Total calls time per month}
     \end{subfigure}
 
-    \caption{Total calls and total call time per month for the \textit{phone\_train} dataset.}
-    \Description{Graphs showing total calls and total call time per month.}
+    \caption{Total calls and total calls time per month for the \textit{phone\_train} dataset.}
+    \Description{Graphs showing total calls and total calls time per month.}
     \label{fig:phone_calltimesandamount}
 \end{figure}
 
 \begin{table}
   \centering
-  \caption{Call time statistics by sex under different data cuts and transformations}
+  \caption{calls time statistics by sex under different data cuts and transformations}
   \label{tab:calltime_sex_cuts}
   \begin{tabularx}{.75\textwidth}{lcccc}
     \toprule
-    Type of cut & Sex & Number of customers & Total call time & Average call time \\
+    Type of cut & Sex & Number of customers & Total calls time & Average calls time \\
     \midrule
     None (raw)      & B & 5266 & 557266412 & 105823 \\
     None (raw)      & F & 1030 &  62493290 &  60673 \\
@@ -134,11 +133,11 @@ I did exactly the same with payment methods, activation zones, activation channe
 
 \begin{table}
   \centering
-  \caption{Call time over different categorical features}
+  \caption{calls time over different categorical features}
   \label{tab:calltime_over_all}
   \begin{tabularx}{.73\textwidth}{lccc}
     \toprule
-    Feature & Number of customers & Total call time & Average call time \\
+    Feature & Number of customers & Total calls time & Average calls time \\
     \midrule
     Tariff plan 3 &  781 &  44811041  &  57376 \\
     Tariff plan 4 &   83 &  10575009  & 127410 \\
@@ -171,35 +170,35 @@ I did exactly the same with payment methods, activation zones, activation channe
 
 \subsubsection{Skewness}
 
-Call time data is usually positively skewed, with many users having low usage and a small number of user with very high usage (e.g.,50.000 seconds). This is easily verifiable at a glance if we look at the density graph in figure \ref{fig:phone_call_density}. This effect can be mitigated by log-transforming the data, as shown in figure \ref{fig:phone_log_call_density}. Moreover, with the \textit{e1071} library I computed a skewness matrix for all features (appendix \ref{app:phone_skewness}): we can see that all monthly-based data (calls, call times, SMS, costs, etc) are highly positively skewed. To manage this problem we can either transform them (log, square root or Box-Cox transform), or use more robust models (such as random forest, Gamma/Poisson or quantile regression). Methods like linear. ridge or lasso regression, and even some non-parametric ones like KNN are not ideal. 
+calls time data is usually positively skewed, with many users having low usage and a small number of users with very high usage (e.g.,50.000 seconds). This is easily verifiable at a glance if we look at the density graph in figure \ref{fig:phone_call_density}. This effect can be mitigated by log-transforming the data, as shown in figure \ref{fig:phone_log_call_density}. Moreover, with the \textit{e1071} library I computed a skewness matrix for all features (appendix \ref{app:phone_skewness}): all monthly-based data (calls, calls times, SMS, costs, etc) is highly positively skewed. To manage this problem we can either transform it (log, square root or Box-Cox transform), or use more robust models (such as random forest, Gamma/Poisson or quantile regression). On the other hand, methods like linear, ridge or lasso regression, and even some non-parametric ones like KNN are not ideal. 
 
 \begin{figure}[h]
     \centering
     \begin{subfigure}{0.4\textwidth}
         \includegraphics[width=\linewidth]{imgs/phone_y_hist.png}
-        \caption{Call time density distribution}
+        \caption{calls time density distribution}
         \label{fig:phone_call_density}
     \end{subfigure}
         \hspace{.05\linewidth}
     \begin{subfigure}{0.4\textwidth}
         \includegraphics[width=\linewidth]{imgs/phone_log_y_hist.png}
-        \caption{Call time density distribution (log-transformed)}
+        \caption{calls time density distribution (log-transformed)}
         \label{fig:phone_log_call_density}
     \end{subfigure}
-    \caption{Call time density distributions for the \textit{phone\_train} dataset.}
-    \Description{Graphs showing call times density.}
+    \caption{calls time density distributions for the \textit{phone\_train} dataset.}
+    \Description{Graphs showing calls times density.}
     \label{fig:phone_calltimesandamount}
 \end{figure}
 
 \subsubsection{Correlation Matrix}
 
-Since \textit{cor} function only works on numerical data, I transformed all categorical with the \textit{model.matrix} function. We can infer the following: age is correlated to all call-related monthly features by roughly 25\%, first and second value-added services are correlated to some, not all, monthly features by roughly 10\%, and the only features that share significant correlation are the monthly call-related ones, for example in month four, outgoing call time and call expenses share a correlation of 97\%, while for the seventh month the correlation drop to 57\%, which is still significant. 
+Since the \textit{cor} function only works on numerical data, I transformed all categorical data with the \textit{model.matrix} function. We can infer the following: age is correlated to all calls-related monthly features by roughly 25\%, first and second value-added services are correlated to some, not all, monthly features by roughly 10\%, and the only features that share significant correlation are the monthly calls-related ones. For example, in month four outgoing calls time and calls expenses share a correlation of 97\%, while for the seventh month the correlation drop to 57\%, which is still significant. 
 
 \subsubsection{Linear Regression Insights}
 
-A preliminary analysis can be done by plotting a linear regression fit (figure \ref{fig:phone_4lnplots}). We can see that the data presents high heteroskedasticity, skewness and in general it is not normally distributed. There are also potential outliers and influential points that could distort the model, such as point 9853. As for features relevance (appendix \ref{app:phone_ln_features_relevance}), for the most part, relevant features are the one related to monthly calls. It is interesting to notice that the second month does not seem to count much, even thought it presents a similar amount of call data compared to the others.
+A preliminary analysis can be done by plotting a linear regression fit (figure \ref{fig:phone_4lnplots}). We can see that the data presents high heteroskedasticity, skewness and in general it is not normally distributed. There are also potential outliers and influential points that could distort the model, such as point 9853. As for features relevance (appendix \ref{app:phone_ln_features_relevance}), for the most part, relevant features are the ones related to monthly calls. It is interesting to notice that the second month does not seem to count much, although having a similar amount of calls data compared to the others.
 
-Log-transforming the target variable yielded better results (figure \ref{fig:phone_4loglnplots}), but the above mentioned problems did not disappear. Feature relevance held some surprises (appendix \ref{app:phone_log_ln_features_relevance}), for example categorical features contributed much more to the model and only a small subset of monthly call data was relevant.
+Log-transforming the target variable yielded better results (figure \ref{fig:phone_4loglnplots}), but the above-mentioned problems did not disappear. Feature relevance held some surprises (appendix \ref{app:phone_log_ln_features_relevance}), for example categorical features contributed much more to the model and only a small subset of monthly calls data was relevant.
 
 \begin{figure}[h]
     \centering
@@ -226,40 +225,40 @@ Data as-is can be transformed into 101 principal components, and the cumulative 
 \begin{figure}[h]
   \centering
   \includegraphics[width=.7\linewidth]{imgs/PCAphone.png}
-  \caption{Scatter Plot for call time for the \textit{phone\_train} dataset.}
-    \Description{Scatterplot of multivariate call time.}
+  \caption{Scatter Plot for calls time for the \textit{phone\_train} dataset.}
+    \Description{Scatterplot of multivariate calls time.}
   \label{fig:phone_pca}
 \end{figure}
 
-\subsubsection{Premilinary Observations Conclusions}
+\subsubsection{Preliminary Observations Conclusions}
 
-Data shows high skewness and heteroskedasticity, and some features do not seem to contribute much to the model. We probably should try to filter out some data, for example SMS amount, transform monthly call data, for example with log or Box-Cox transforms, and use some robust regression methods, such as quantile or tree-based approaches.
+Data shows high skewness and heteroskedasticity, and some features do not seem to contribute much to the model. We probably should try to filter out some data, for example SMS amount, transform monthly calls data, for example with log or Box-Cox transforms, and use some robust regression methods, such as quantile or tree-based approaches.
 
 \subsection{Modeling}
 
 \subsubsection{Lasso Regression}
 
-I used lasso regression with cross-validation as a preliminary diagnostic tool to check which features drop or transform.
+I used lasso regression with cross-validation as a preliminary diagnostic tool to check which features are better off dropped or transformed.
 First, I made a baseline prediction without transforming any value, with the following mean square error: $MSE = 18091358$. Not great, but expected since we saw in the preliminary observations many signs of non-linearity.
 
 I then tried log-transforming the target value (with all features), which resulted in a massive improvement: $MSE = 6.200236$. 
 
 Then, on the not transformed target, I tried different predictions with different data filtering, with the following results: filtering out incoming calls, SMS and calls to the call center yielded a 3\% improvement over the all-features model ($MSE = 18040253$). Putting calls to the call center back in worsened the model slightly ($MSE = 18080968$). I thus decided to leave these features filtered out permanently.
 
-Then, I tired to filter out out either both or any between calls value and calls amount, which produced a worse performing model in all instances. Then, I filtered out non monthly features, and discovered in the end that the best result ($MSE = 18019454$) can be obtained with the following features \textbf{filtered out}: payment method, value-added service two, activation zone and activation channel (plus, of course, the previously mentioned incoming calls, SMS and calls to the call center).
+Then, I tried to filter out either both or any between calls value and calls amount, which produced a worse performing model in all instances. Then, I filtered out non-monthly features, and discovered in the end that the best result ($MSE = 18019454$) can be obtained with the following features \textbf{filtered out}: payment method, value-added service two, activation zone and activation channel (plus, of course, the previously mentioned incoming calls, SMS and calls to the call center).
 
-I then tried to pre-process the monthly features, such as adding together peak and off-peak values or predict on the average monthly call times. All yielded worse results.
+I then tried to pre-process the monthly features, such as adding together peak and off-peak values or predict on the average monthly calls times. All yielded worse results.
 
-Lastly, wit the best performing filtering, I log-transformed only the target ($MSE = 6.253648$), only the monthly features ($MSE =20415157$), and then both, which ultimately yielded the bet result: $MSE = 4.289544$. It is worth nothing that log-transforming the target on the filtered dataset produce a worse performing fit than a model fitted on all data and log-transformed target. 
+Lastly, with the best performing filtering, I log-transformed only the target ($MSE = 6.253648$), only the monthly features ($MSE =20415157$), and then both, which ultimately yielded the best result: $MSE = 4.289544$. It is worth noting that log-transforming the target on the filtered dataset produced a worse performing fit than a model fitted on all data and log-transformed target. 
 
-To summarize: the best performing model is obtained by filtering out payment method, value-added service two, activation zone, activation channel, incoming calls, SMS and calls to the call center, and by log-transforming the target and the remaining monthly call-related features.
+To summarize: the best performing model is obtained by filtering out payment method, value-added service two, activation zone, activation channel, incoming calls, SMS and calls to the call center, and by log-transforming the target and the remaining monthly calls-related features.
 
 The complete list of filtering and transformations can be seen in appendix \ref{app:phone_lasso_filtering}
 
 \subsubsection{Random Forest}
 
-Considering all of the above a model inherently robust to non-normally distributed data should yield better results. Random Forest is a good example of such a model. I still log-transforming both target and predictor since it showed good results, and fitting this type of model requires a lot of time. I run the model with the \textit{ranger} method on a \textit{tuneLength} of ten with cross-validation. Compared to the previous challenge I had to give up on LOOCV due to memory constraints.
-The resulting best fit (figure \ref{fig:phone_randomorest},with $mtry=8$, variance as the split rule and minimum node size of five) yielded the best mean square error overall: $MSE = 3.947784$, which is why I ultimately used this model to predict the target value.
+Considering all of the above, a model inherently robust to non-normally distributed data should yield better results. random forest is a good example of such a model. I still log-transformed both the target and the predictors since it showed good results. I fitted the model with the \textit{ranger} method on a \textit{tuneLength} of ten with cross-validation. Compared to the previous challenge I had to give up on LOOCV due to memory constraints.
+The resulting best fit (figure \ref{fig:phone_randomforest},with $mtry=8$, variance as the split rule and minimum node size of five) yielded the best mean square error overall: $MSE = 3.947784$, which is why I ultimately used this model to predict the target value.
 
 \begin{figure}[h]
   \centering
@@ -271,4 +270,4 @@ The resulting best fit (figure \ref{fig:phone_randomorest},with $mtry=8$, varian
 
 \subsection{Phone Users Conclusions}
 
-The dataset was, in fact, highly not normally distributed and non-linear, so transforming the features greatly improved a linear fit such as lasso. Moreover, using a robust model yielded even better results, proving our hypothesis.
+The dataset was, in fact, not normally distributed and non-linear, so transforming the features greatly improved a linear fit such as lasso, and using a robust model yielded even better results.

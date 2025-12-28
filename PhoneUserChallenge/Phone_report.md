@@ -314,7 +314,7 @@ q09.out.val.offpeak                    -4.800 1.61e-06 ***
 q09.ch.cc                              -2.097 0.036019 *  
 ```
 
-We can see that, for the most part, relevant features are the one related to monthly calls. It is interesting to notice that the second month does not seem to hold much weight, even thought it presents a similar amount of call data compared to the first.
+We can see that, for the most part, relevant features are the ones related to monthly calls. It is interesting to notice that the second month does not seem to hold much weight, even thought it presents a similar amount of call data compared to the first.
 
 Log transforming the target yield better results, with a general normalization of the values, but we still see the same problems.
 

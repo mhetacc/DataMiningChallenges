@@ -482,7 +482,7 @@ model_fit <- train(..., allowParallel = TRUE)
 stopCluster(cl)
 ``` 
 
-I decided to try to reduce the total amount of features by computing an average for the four most correlated ones, much like I did with linear regression at the begging of this report (we already saw that dropping them yield similar to worse results). Then I trained the model once again with LOOCV on the merged features in parallel. 
+I decided to try to reduce the total amount of features by computing an average for the four most correlated ones, much like I did with linear regression at the begging of this report (we already saw that dropping them yielded similar or worse results). Then I trained the model once again with LOOCV on the merged features in parallel. 
 
 ```{r}
 rice.train$Combined <- rowMeans(rice.train[, c("Area","Perimeter","Major_Axis_Length","Convex_Area")])

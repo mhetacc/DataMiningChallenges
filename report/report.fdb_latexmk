@@ -1,5 +1,5 @@
 # Fdb version 4
-["pdflatex"] 1766932994.59652 "/home/mhetac/Documents/Data Mining/DataMiningChallenges/report/report.tex" "report.pdf" "report" 1766932998.50536 0
+["pdflatex"] 1766936097.28741 "/home/mhetac/Documents/Data Mining/DataMiningChallenges/report/report.tex" "report.pdf" "report" 1766936101.44816 0
   "/home/mhetac/Documents/Data Mining/DataMiningChallenges/report/report.tex" 1766931936.81425 7556 c913dce353497a67635c9138d8f15921 ""
   "/usr/share/texlive/texmf-dist/fonts/enc/dvips/inconsolata/i4-t1-4.enc" 1558214095 7693 0f2dce6d313c82989ec3a67fc24df2a0 ""
   "/usr/share/texlive/texmf-dist/fonts/enc/dvips/libertine/lbtn_25tcsq.enc" 1490131464 2921 8ca0eb0831f9bc5da080d3697cfe67bf ""
@@ -248,12 +248,12 @@
   "imgs/validationplot_pcr.png" 1766601032.77938 27933 73eff454836c8d38fca8f5316f94fcc6 ""
   "imgs/validationplot_pls.png" 1766601073.95038 26906 4331dcd2ecbb1e52373207861cd16d81 ""
   "lstlisting_settings.tex" 1764001821.59337 923 6c327df865b68b4ddddc74a9f42a2ca7 ""
-  "report.aux" 1766932998.31127 18075 2a1caa4d94088879a9a8981369998780 "pdflatex"
-  "report.out" 1766932998.31227 2764 6aecd88596811582738750d354216104 "pdflatex"
+  "report.aux" 1766936101.24531 18100 65f7415d28712128772afa34c90b7f85 "pdflatex"
+  "report.out" 1766936101.24731 2764 6aecd88596811582738750d354216104 "pdflatex"
   "report.tex" 1766931936.81425 7556 c913dce353497a67635c9138d8f15921 ""
   "sections/appendix.tex" 1766770980.9084 10359 6b6d4e54b993e873841b4f4f5467770d ""
-  "sections/phone.tex" 1766930832.74524 17344 70911b906a113494e2cb99241127d868 ""
-  "sections/rice.tex" 1766932990.59327 18394 f4130f28ee398fa80e28ca41204d1bb5 ""
+  "sections/phone.tex" 1766936096.98331 17343 9d61b71f59f8068fc495a8b90b928a24 ""
+  "sections/rice.tex" 1766935406.5003 18392 c9217c4cff47ed18c6aa458e4b912131 ""
   (generated)
   "report.aux"
   "report.log"
