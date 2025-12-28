@@ -193,7 +193,7 @@ Call time data is usually positively skewed, with many users having low usage an
 
 \subsubsection{Correlation Matrix}
 
-Since \verb|cor| function only works on numerical data, I transformed all categorical with the \verb|model.matrix| function. We can infer the following: age is correlated to all call-related monthly features by roughly 25\%, first and second value-added services are correlated to some, not all, monthly features by roughly 10\%, and the only features that share significant correlation are the monthly call-related ones, for example in month four, outgoing call time and call expenses share a correlation of 97\%, while for the seventh month the correlation drop to 57\%, which is still significant. 
+Since \textit{cor} function only works on numerical data, I transformed all categorical with the \textit{model.matrix} function. We can infer the following: age is correlated to all call-related monthly features by roughly 25\%, first and second value-added services are correlated to some, not all, monthly features by roughly 10\%, and the only features that share significant correlation are the monthly call-related ones, for example in month four, outgoing call time and call expenses share a correlation of 97\%, while for the seventh month the correlation drop to 57\%, which is still significant. 
 
 \subsubsection{Linear Regression Insights}
 
@@ -258,7 +258,7 @@ The complete list of filtering and transformations can be seen in appendix \ref{
 
 \subsubsection{Random Forest}
 
-Considering all of the above a model inherently robust to non-normally distributed data should yield better results. Random Forest is a good example of such a model. I still log-transforming both target and predictor since it showed good results, and fitting this type of model requires a lot of time. I run the model with the \verb|ranger| method on a \verb|tuneLength| of ten with cross-validation. Compared to the previous challenge I had to give up on LOOCV due to memory constraints.
+Considering all of the above a model inherently robust to non-normally distributed data should yield better results. Random Forest is a good example of such a model. I still log-transforming both target and predictor since it showed good results, and fitting this type of model requires a lot of time. I run the model with the \textit{ranger} method on a \textit{tuneLength} of ten with cross-validation. Compared to the previous challenge I had to give up on LOOCV due to memory constraints.
 The resulting best fit (figure \ref{fig:phone_randomorest},with $mtry=8$, variance as the split rule and minimum node size of five) yielded the best mean square error overall: $MSE = 3.947784$, which is why I ultimately used this model to predict the target value.
 
 \begin{figure}[h]

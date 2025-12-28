@@ -2,21 +2,13 @@
 
 \subsection{Preliminary Observations}
 
-\subsubsection{Dataset}
+\subsubsection{Datasets}
 
-All following considerations are made using the datasets provided on the challenge page (\textit{rice\_test.csv} and \textit{rice\_train.csv}), but it is worth noting that they both stem from an original one that can be found at the \href{https://www.muratkoklu.com/datasets/}{dataset source page}. I used it to compute an alternative version of the test dataset that contains the true attribute for \textit{Class} (listing \ref{code:mergedatasets}).
-
-\begin{lstlisting}[language={Python},label={code:mergedatasets}, caption={Merge datasets}]
-df1 = pd.read_csv("rice_test.csv").round(10)
-df2 = pd.read_csv("Rice_Cammeo_Osmancik.csv").round(10)
-
-keys = [col for col in df1.columns]
-merged = df1.merge(df2, on=keys, how="inner")
-\end{lstlisting}
+All that follows is based on the datasets provided in the challenge page (\textit{rice\_test.csv} and \textit{rice\_train.csv}), even thought they both stem from an original one, which can be found at the following link: \url{https://www.muratkoklu.com/datasets/}.
 
 \subsubsection{Scatter Plot}
 
-From the \textit{scatter plot} (figure \ref{fig:scatterplot_rice_loess}) we can infer that there are four features (\textit{Area}, \textit{Perimeter}, \textit{Convex\_Area} and \textit{Major\_Axis\_Length}) that seem to be extremely correlated
+From the \textit{scatter plot} (figure \ref{fig:scatterplot_rice_loess}) we can infer that there are four extremely correlated features: \textit{Area}, \textit{Perimeter}, \textit{Convex\_Area} and \textit{Major\_Axis\_Length}.
 
 \begin{figure}[h]
   \centering
@@ -28,7 +20,7 @@ From the \textit{scatter plot} (figure \ref{fig:scatterplot_rice_loess}) we can 
 
 \subsubsection{Correlation Matrix}
 
-We can use a correlation matrix (table \ref{tab:correlation_matrix_rice}) to see exactly how related to each other the features are. As suspected, all four features before-mentioned have a high degree of correlation (over ninety percent). Once way to handle this is to either use models robust against collinearity, or to either combine or remove some of the correlated features.  
+I used a correlation matrix (table \ref{tab:correlation_matrix_rice}) to see exactly how correlated the features are. As suspected, all four features before-mentioned have a high degree of correlation (over ninety percent). To handle this is we can either combine or remove the correlated features, or use models robust against collinearity.  
 
 \begin{table}
   \small
@@ -52,7 +44,7 @@ We can use a correlation matrix (table \ref{tab:correlation_matrix_rice}) to see
 
 \subsubsection{Features' Importance}
 
-To get a better idea on the importance of each feature, I trained a simple linear regression model, and looked at the result with \verb|summary(fit)|, which can be seen in table \ref{tab:regression_coefficients}. The significance stars tells us visually that, with the exception of \textit{Minor\_Axis\_Length}, the features that are highly correlated to each other contributes strongly to the model, while the \textit{Eccentricity} and \textit{Extent} contribute very little.
+To get a better idea on the importance of each feature, I trained a simple linear regression model, and looked at the result with \textit{summary(fit)}, which can be seen in table \ref{tab:regression_coefficients}. The significance stars tell us visually that, with the exception of \textit{Minor\_Axis\_Length}, highly correlated features contributes strongly to the model, while \textit{Eccentricity} and \textit{Extent} contribute very little.
 
 \begin{table}
   \centering
@@ -74,7 +66,7 @@ To get a better idea on the importance of each feature, I trained a simple linea
   \end{tabularx}
 \end{table}
 
-We can also measure the total variance explained by all predictors combined using $R^2 = 0.6953849$, and we can check the standardized coefficients to better compare predictors' importance, as shown in table \ref{tab:standardized_coefficients}. Once again, we can see that Extent and Eccentricity contribute very little to the overall model.
+We can also measure the total variance explained by all predictors combined using $R^2 = 0.6953849$, and we can check the standardized coefficients to better compare predictors' importance, as shown in table \ref{tab:standardized_coefficients}. Once again, we can see that \textit{Extent} and \textit{Eccentricity} contribute very little to the overall model.
 
 \begin{table}
   \centering
@@ -98,7 +90,7 @@ We can also measure the total variance explained by all predictors combined usin
 
 \subsubsection{Principal Components}
 
-A good way to aggregate and simplify data is by decomposing it into its principal components (centered in zero and scaled to have unit variance). Components' summary can be seen in table \ref{tab:rice_pca_importance}, and it shows us that more than ninety nine percent of overall variance can be explained with just three components, so a 2D visualization with only the first two components should give us a good idea of the whole dataset (figure \ref{fig:rice_2pca_plot}). The plot suggests that data is well separated, with similar classes clustering nicely. This should make classification easier. 
+A good way to aggregate and simplify data is by decomposing it into its principal components (centered in zero and scaled to have unit variance). Components' summary can be seen in table \ref{tab:rice_pca_importance}, and it shows us that more than 99\% of overall variance can be explained with just three components, so a 2D visualization with only the first two components should give us a good idea of the whole dataset (figure \ref{fig:rice_2pca_plot}). The plot suggests that data is well separated, with similar classes clustering nicely. This should make classification easier. 
 
 \begin{table}
   \centering
@@ -129,9 +121,9 @@ After exploring the dataset, I tried to find the best performing model for predi
 
 \subsubsection{Linear Regression}
 
-First I split the training dataset into training and validation sets, fitted the model and compute its \textit{MSE}. From this basic regression I got $MSE = 0.07354557$. Since we know from the preliminary observations that some features are highly correlated (so the dataset suffers from collinearity), I tried to transform the dataset to reduce it. A straightforward solution is to compute the average of all of them (listing \ref{code:avg_rice_correlated}), but this yield a slightly worse result: $MSE \approx 0.074$.
+First I split the training dataset into training and validation sets, fitted the model and computed its mean square error: $MSE = 0.07354557$. Since we know from the preliminary observations that some features are highly correlated (so the dataset suffers from collinearity), I tried to transform the dataset to reduce it. A straightforward approach is to compute the average of all of them (listing \ref{code:avg_rice_correlated}), but this yielded a slightly worse result: $MSE \approx 0.074$.
 
-Another approach would be to drop features altogether, but first we want to measure their variance inflation factor. As a rule of thumb, a \textit{VIF} value above then indicates a problematic amount of collinearity, so I tired to drop features iteratively to see if the model improves, as shown in table \ref{tab:vif_drop_analysis}. For each dropped variable I computed the \textit{VIFs} and the \textit{MSE} of the resulting model. As we can see, dropping \textit{Area} resulted in performances similar to combining the variables, while dropping the other features worsened prediction performances even further.
+Another alternative would be to drop the features altogether, after measuring their variance inflation factor. As a rule of thumb, a \textit{VIF} value above then indicates a problematic amount of collinearity, so I tired to drop features iteratively to see if the model improves, as shown in table \ref{tab:vif_drop_analysis}. For each dropped variable I computed the \textit{VIFs} and the \textit{MSE} of the resulting model. As we can see, dropping \textit{Area} resulted in performances similar to combining the variables, while dropping the other features worsened prediction performances even further.
 
 \begin{table}
   \small
@@ -150,6 +142,7 @@ Another approach would be to drop features altogether, but first we want to meas
   \end{tabularx}
 \end{table}
 
+\FloatBarrier
 \begin{lstlisting}[language={R},label={code:avg_rice_correlated}, caption={Average of highly correlated features}]
 rice.train$Combined <- rowMeans(rice.train[, c("Area","Perimeter","Major_Axis_Length","Convex_Area")])
 
@@ -166,10 +159,11 @@ linear_fit = lm(
 pred <- predict(linear_fit, newdata = rice_train[test, ])
 mean((pred - y.test)^2)     # [1] 0.07439239
 \end{lstlisting}
+\FloatBarrier
 
 \subsubsection{Ridge Regression}
 
-I used the \textit{glmnet} library, which takes care of the variable standardization for us, has a built-in cross-validation functionionality to compute the best possible $\lambda$. With code \ref{code:rice_ridge} we get a result worse than linear regression, since $MSE = 0.07924703$. That being said, we can see in plot \ref{fig:rice_ridge} an effective shrinkage of most coefficients towards zero, with the exception of Eccentricity, which we already recognized as not very impactful on the overall variance and prediction.
+I used the \textit{glmnet} library, which takes care of the variable standardization for us and has a built-in cross-validation functionionality to compute the best possible $\lambda$ (code \ref{code:rice_ridge}). The resulting model was slightly worse than linear regression, since $MSE = 0.07924703$. That being said, we can see in plot \ref{fig:rice_ridge} an effective shrinkage of most coefficients towards zero, with the exception of \textit{Eccentricity}, which we already recognized as not very impactful on the overall variance and prediction performances.
 
 \begin{lstlisting}[language={R},label={code:rice_ridge}, caption={Ridge regression on rice dataset}]
 library(glmnet)
@@ -190,7 +184,7 @@ cv_rmse <- sqrt(cv_mse)       # [1] 0.2815085
 
 \subsubsection{Lasso Regression}
 
-Very similar to ridge regression, except \textit{glmnet} gets called with \verb|alpha = 1|. We get a slightly better result than ridge, with $MSE = 0.07348723$. From the plot (in figure \ref{fig:rice_lasso}), we can see that once again Eccentricity seems to resist shrinkage, but overall coefficient reduction is much more accentuated compare to ridge, since lasso can set them to zero. 
+Very similar to ridge regression, except \textit{glmnet} gets called with \textit{alpha = 1}. We get a slightly better result than ridge, with $MSE = 0.07348723$. From the plot (in figure \ref{fig:rice_lasso}), we can see that once again \textit{Eccentricity} seems to resist shrinkage, but overall coefficient reduction is much more accentuated compare to ridge, since lasso can set them to zero. 
 
 \begin{figure}[h]
   \centering
@@ -202,7 +196,7 @@ Very similar to ridge regression, except \textit{glmnet} gets called with \verb|
 
 \subsubsection{Principal Components Regression}
 
-I fitted the model with \textit{pls} library built-in cross-validation, as seen in code \ref{code:rice_pcr}. The lowest error (figure \ref{fig:rice_pcr}) is achieved with seven components: $MSE =  0.07354557$, slightly worse than lasso regression.
+I fitted the model with \textit{pls} library's built-in cross-validation, as seen in code \ref{code:rice_pcr}. The lowest error (figure \ref{fig:rice_pcr}) is achieved with seven components: $MSE =  0.07354557$, slightly worse than lasso regression.
 
 \begin{lstlisting}[language={R},label={code:rice_pcr}, caption={Principal components regression on rice dataset}]
 pcr.fit <- pcr(
@@ -236,7 +230,7 @@ I used the same \textit{pls} library to fit the partial least squares model on t
 
 \subsubsection{LOESS}
 
-I then tried some non-parametric methods, starting with \textit{LOESS} regression. This method allows up to four predictors, so I used the most useful ones previously identified: \textit{Area}, \textit{Perimeter}, \textit{Convex\_Area} and \textit{Major\_Axis\_Length}. Predictors are normalized by default. Then, fitted three models with three different values for \verb|span|. Predictions must be sanitized since there some test points can fall outside the local neighborhood, meaning being \verb|Na|. With $span = 0.1$ we have five such predictions. The code can be seen at \ref{code:rice_loess}. The results were disastrous, so I tried to include only two predictors. This yielded the best results yet out of all models: with $span = 0.1$, $MSE=0.06099749$. All results are summarized in table \ref{tab:rice_loess}
+I then tried some non-parametric methods, starting with \textit{LOESS} regression. This method allows up to four predictors, so I used the most useful ones previously identified: \textit{Area}, \textit{Perimeter}, \textit{Convex\_Area} and \textit{Major\_Axis\_Length}. Predictors are normalized by default. Then, I fitted three models with three different values for \textit{span}. Predictions must be sanitized since some test points can fall outside the local neighborhood (meaning being \textit{Na}). With $span = 0.1$ we have five such predictions. The code can be seen at \ref{code:rice_loess}. The results were disastrous ($MSE \approx 46$), so I tried to include only two predictors. This yielded the best result yet: with $span = 0.1$, $MSE=0.06099749$. All results are summarized in table \ref{tab:rice_loess}
 
 \begin{lstlisting}[language={R},label={code:rice_loess}, caption={LOESS regression on rice dataset with four predictors and $span=1$}]
 loess_fit1 <- loess(
@@ -274,9 +268,9 @@ mean((pred1 - y.test)^2, na.rm = TRUE)    # [1] 46.0226
 
 \subsubsection{K-Nearest Neighbors}
 
-I used the \textit{caret} library to fit \textit{KNN} classification both for regression and classification. The former to get a comparable prediction with the other models, the latter to be more logically sound, since \textit{Class} is a categorical target. The code for classification can be seen at \ref{code:rice_knn}, for regression the only difference is the \verb|metric| parameter: \verb|"Accuracy"| for classification, \verb|"RMSE"| for regression. For both methods I used Leave-One-Out-Cross-Validation, and both RMSE plots can be seen in figure \ref{fig:rice_knn}. 
+I used the \textit{caret} library to fit \textit{KNN} both for classification and regression. The latter to get a comparable prediction with the other models, the former to be more logically sound, since \textit{Class} is a categorical target. The code for classification can be seen at \ref{code:rice_knn}, between the two methods the only difference is the \textit{metric} parameter: \textit{"Accuracy"} for classification, \textit{"RMSE"} for regression. For both methods I used Leave-One-Out-Cross-Validation, and both RMSE plots can be seen in figure \ref{fig:rice_knn}. 
 
-For regression, the best result is achieved with nineteen neighbors, yielding a mean square error even better than LOESS: $MSE = 0.05688406$. For classification, the best accuracy is achieved with twenty neighbors, yielding an accuracy of almost 93\%. This last model is the one I ultimately used to predict the target values on the test dataset.
+For regression, the best result is achieved with nineteen (19) neighbors, yielding a mean square error even better than LOESS: $MSE = 0.05688406$. For classification, the best accuracy is achieved with twenty (20) neighbors, yielding an accuracy of almost 93\%. This last model is the one I ultimately used to predict the target values on the test dataset.
 
 \begin{lstlisting}[language={R},label={code:rice_knn}, caption={KNN regression on rice dataset with Leave-One-Out-Cross-Validation}]
 train.control <- trainControl(method  = "LOOCV")
@@ -311,10 +305,11 @@ knn_fit <- train(
 \end{figure}
 
 \subsubsection{Random Forest}
+\label{sec:rice_randomforest}
 
-The last method I tried is \textit{random forest} with Leave-One-Out-Cross-Validation, using the \textit{caret} library still. Since this method is extremely computationally expensive, I had to leverage the library \textit{doParallel} to use all available CPU cores, and I used the \textit{ranger} method instead, which is a faster random forest implementation. I also reduced the amount of predictors by combining the highly correlated ones (we already saw that dropping them yield similar to worse results). The code can be seen at \ref{rice_randomforest}.
+The last method I tried is \textit{random forest} with Leave-One-Out-Cross-Validation, using the \textit{caret} library still. Since this method is extremely computationally expensive, I had to leverage the library \textit{doParallel} to use all available CPU cores, and I used the faster implementation \textit{ranger}. I also reduced the amount of predictors by combining the highly correlated ones (we already saw that dropping them yield similar to worse results). The code can be seen at listing \ref{code:rice_randomforest}.
 
-The optimal model, with $mtry = 2$, $splitrule = extratress$ and $min.node.size = 5$, yielded a slighly worse result than KNN trained on all features: $MSE = 0.0589397$. The plot for \textit{RMSE} can be seen in figure \ref{rice_randomforest}
+The optimal model, with $mtry = 2$, $splitrule = extratress$ and $min.node.size = 5$, yielded a slighly worse result than KNN trained on all features: $MSE = 0.0589397$. The plot for the \textit{RMSE} can be seen in figure \ref{fig:rice_randomforest}
 
 \begin{lstlisting}[language={R},label={code:rice_randomforest}, caption={Random Forest regression on \textit{rice\_train} dataset with Leave-One-Out-Cross-Validation}]
 train.control <- trainControl(method  = "LOOCV")
@@ -335,11 +330,11 @@ rf_fit <- train(
   \includegraphics[width=.7\linewidth]{imgs/randomforest.png}
   \caption{RMSE error for random forest on \textit{rice\_train} dataset.}
     \Description{Plot shows MSE getting lower as components are added.}
-  \label{fig:rice_pls}
+  \label{fig:rice_randomforest}
 \end{figure}
 
 \subsection{Rice Varieties Conclusions}
 
-The best model so far is KNN with $K = [19,20]$. While slightly more computationally expensive than other methods (with the exception of random forest) it improves MSE by $0.00411343$ over the second best method (LOESS with $span = 0.1$). I decided to use predict the target with a KNN fit in classification mode, since I felt it more logically sound.
+The best model so far is KNN with $K = [19,20]$. While slightly more computationally expensive than other methods (with the exception of random forest) it improves MSE by $0.00411343$ over the second best method (LOESS with $span = 0.1$). I decided to predict the target with a KNN fit in classification mode, since I felt it was more logically sound.
 
-I decided not to try random forest with all predictors for time constraints: it required a 10-Cores machine (i7-13620H @ 4.90 GHz) twenty-five minutes to fit the model.
+I decided not to try random forest with all predictors for time constraints: it required a 10-Cores machine (i7-13620H @ 4.90 GHz) twenty-five minutes to fit the model presented in section \ref{sec:rice_randomforest}.
