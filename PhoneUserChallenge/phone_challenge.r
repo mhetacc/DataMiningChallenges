@@ -704,7 +704,7 @@ random_forest_parallel_ranger<-function(){
 
   # load library and set validation method
   library(caret)
-  train.control <- trainControl(method  = "cv")
+  train.control <- trainControl(method  = "oob")
 
 
 
@@ -732,6 +732,7 @@ random_forest_parallel_ranger<-function(){
 
   #cols <- grep("^q0[1-9]\\.out\\.(ch|dur|val)\\.", names(phone_test_filtered), value = TRUE)
   #phone_test_filtered[cols] <- lapply(phone_test_filtered[cols], log1p)
+  library(dplyr)
 
   phone_test_filtered <- phone_test_filtered %>%
   mutate(across(all_of(cols), ~ {
