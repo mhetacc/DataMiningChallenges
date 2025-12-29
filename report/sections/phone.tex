@@ -257,7 +257,7 @@ The complete list of filtering and transformations can be seen in appendix \ref{
 
 \subsubsection{Random Forest}
 
-Considering all of the above, a model inherently robust to non-normally distributed data should yield better results. random forest is a good example of such a model. I still log-transformed both the target and the predictors since it showed good results. I fitted the model with the \textit{ranger} method on a \textit{tuneLength} of ten with out-of-bag validation. Compared to the previous challenge I had to give up on LOOCV due to memory constraints.
+Considering all of the above, a model inherently robust to non-normally distributed data should yield better results. random forest is a good example of such a model. I still log-transformed both the target and the predictors since it showed good results. I fitted the model with the \textit{ranger} method on a \textit{tuneLength} of ten with out-of-bag error estimation. Compared to the previous challenge I had to give up on LOOCV due to memory constraints.
 The resulting best fit (figure \ref{fig:phone_randomforest},with $mtry=8$, variance as the split rule and minimum node size of five) yielded the best mean square error overall: $MSE = 3.945173$, which is why I ultimately used this model to predict the target value.
 
 \begin{figure}[h]
