@@ -8,7 +8,7 @@ Objective:
 - Rice: predict rice variety, target categorical
 - Phone: predict monthly call time, target numerical
 
-A full pdf report can be seen at: ![mhetacc/DataMiningChallenges/report.pdf](https://github.com/mhetacc/DataMiningChallenges/blob/main/report/report.pdf)
+A full pdf report can be seen at: ![mhetacc/UNIPD_DataMiningClassificationRegression/report.pdf](https://github.com/mhetacc/UNIPD_DataMiningClassificationRegression/blob/0f0573f87e24efd75f3ae55be952e75852f156de/report/report.pdf)
 
 ## Scatter Plots
 
